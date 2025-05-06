@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="js/zoom-reset.js"></script>
+    <title>Track Meals | Meal Prep Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/enhanced-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Meal Prep Tracker</h1>
+        <div class="mobile-menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <div class="nav-left-group">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="smoothies.html">Smoothies</a></li>
+                    <li><a href="nutrition.html">Nutrition</a></li>
+                </div>
+                <div class="nav-right-group">
+                    <li><a href="meal-plan.html">Meal Plan</a></li>
+                    <li><a href="tracking.html" class="active">Track Meals</a></li>
+                    <li><a href="recipe-management.html">Recipes</a></li>
+                </div>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="page-content">
+        <section class="hero tracking-hero">
+            <h2>Track Your Meal Journey</h2>
+            <p>Monitor your progress, celebrate success, and stay motivated with visual tracking tools.</p>
+        </section>
+
+        <section class="tracking-overview">
+            <div class="stat-cards">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                    <div class="stat-info">
+                        <h3>Days Tracked</h3>
+                        <div class="stat-value" id="days-tracked">0/30</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+                    <div class="stat-info">
+                        <h3>Success Rate</h3>
+                        <div class="stat-value" id="success-rate">0%</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-fire"></i></div>
+                    <div class="stat-info">
+                        <h3>Current Streak</h3>
+                        <div class="stat-value" id="current-streak">0 days</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-award"></i></div>
+                    <div class="stat-info">
+                        <h3>Achievements</h3>
+                        <div class="stat-value" id="achievements-count">0</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="tracking-section">
+            <h2>Daily Meal Tracking</h2>
+            <p>Track your meals starting from May 6th. Check off each meal and smoothie as you complete them.</p>
+            
+            <!-- Today's Smoothies Section -->
+            <section id="todays-smoothies-section" style="display:none;margin-bottom:2rem;">
+                <h3>Today's Smoothies</h3>
+                <ul id="todays-smoothies-list" style="display:flex;flex-wrap:wrap;gap:1rem;list-style:none;padding:0;"></ul>
+            </section>
+
+            <div class="date-navigation">
+                <button id="prev-day" class="nav-btn"><i class="fas fa-chevron-left"></i> Previous Day</button>
+                <div class="current-date-container">
+                    <h3 id="current-date">May 6, 2023</h3>
+                    <span id="day-number" class="day-number">Day 1 of 30</span>
+                </div>
+                <button id="next-day" class="nav-btn">Next Day <i class="fas fa-chevron-right"></i></button>
+            </div>
+            
+            <div class="tracking-grid">
+                <div class="meal-tracking-card">
+                    <h3>Breakfast</h3>
+                    <div id="breakfast-details" class="meal-details" style="cursor:pointer" title="Click for recipe"></div>
+                    <div class="tracking-controls">
+                        <label><input type="checkbox" id="breakfast-completed"> Completed</label>
+                        <label><input type="checkbox" id="breakfast-smoothie"> + Smoothie</label>
+                    </div>
+                    <textarea id="breakfast-notes" placeholder="Add notes (e.g., modifications, how you felt)"></textarea>
+                </div>
+                <div class="meal-tracking-card">
+                    <h3>Lunch</h3>
+                    <div id="lunch-details" class="meal-details" style="cursor:pointer" title="Click for recipe"></div>
+                    <div class="tracking-controls">
+                        <label><input type="checkbox" id="lunch-completed"> Completed</label>
+                        <label><input type="checkbox" id="lunch-smoothie"> + Smoothie</label>
+                    </div>
+                    <textarea id="lunch-notes" placeholder="Add notes (e.g., modifications, how you felt)"></textarea>
+                </div>
+                <div class="meal-tracking-card">
+                    <h3>Dinner</h3>
+                    <div id="dinner-details" class="meal-details" style="cursor:pointer" title="Click for recipe"></div>
+                    <div class="tracking-controls">
+                        <label><input type="checkbox" id="dinner-completed"> Completed</label>
+                        <label><input type="checkbox" id="dinner-smoothie"> + Smoothie</label>
+                    </div>
+                    <textarea id="dinner-notes" placeholder="Add notes (e.g., modifications, how you felt)"></textarea>
+                </div>
+                <div class="meal-tracking-card">
+                    <h3>Extra Smoothie</h3>
+                    <div class="tracking-controls">
+                        <label><input type="checkbox" id="extra-smoothie"> Had extra smoothie</label>
+                    </div>
+                    <textarea id="smoothie-notes" placeholder="Smoothie type or notes"></textarea>
+                </div>
+            </div>
+
+            <div class="water-tracking">
+                <h3>Water Intake</h3>
+                <div class="water-users">
+                    <div class="water-user">
+                        <div class="user-label selman-label">
+                            <i class="fas fa-male"></i> Selman
+                        </div>
+                        <div class="water-glasses selman-glasses">
+                            <div class="glass selman-glass" data-user="selman" data-glass="1"></div>
+                            <div class="glass selman-glass" data-user="selman" data-glass="2"></div>
+                            <div class="glass selman-glass" data-user="selman" data-glass="3"></div>
+                            <div class="glass selman-glass" data-user="selman" data-glass="4"></div>
+                            <div class="glass selman-glass" data-user="selman" data-glass="5"></div>
+                            <div class="glass selman-glass" data-user="selman" data-glass="6"></div>
+                            <div class="glass selman-glass" data-user="selman" data-glass="7"></div>
+                            <div class="glass selman-glass" data-user="selman" data-glass="8"></div>
+                        </div>
+                    </div>
+                    <div class="water-user">
+                        <div class="user-label aybike-label">
+                            <i class="fas fa-female"></i> Aybike
+                        </div>
+                        <div class="water-glasses aybike-glasses">
+                            <div class="glass aybike-glass" data-user="aybike" data-glass="1"></div>
+                            <div class="glass aybike-glass" data-user="aybike" data-glass="2"></div>
+                            <div class="glass aybike-glass" data-user="aybike" data-glass="3"></div>
+                            <div class="glass aybike-glass" data-user="aybike" data-glass="4"></div>
+                            <div class="glass aybike-glass" data-user="aybike" data-glass="5"></div>
+                            <div class="glass aybike-glass" data-user="aybike" data-glass="6"></div>
+                            <div class="glass aybike-glass" data-user="aybike" data-glass="7"></div>
+                            <div class="glass aybike-glass" data-user="aybike" data-glass="8"></div>
+                        </div>
+                    </div>
+                </div>
+                <p>Click to mark glasses as consumed for each person</p>
+            </div>
+
+            <div class="day-summary"></div>
+                <h3>Day Summary</h3>
+                <div id="completion-rate">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <p><span id="completion-percent">0%</span> completed today</p>
+                </div>
+                <button id="save-day" class="btn">Save Progress</button>
+            </div>
+        </section>
+
+        <section class="weekly-view">
+            <h2>Weekly Progress</h2>
+            
+            <div class="weekly-summary-stats">
+                <div class="weekly-stat">
+                    <div class="weekly-stat-value" id="weekly-completion">0%</div>
+                    <div class="weekly-stat-label">Weekly Completion</div>
+                </div>
+                <div class="weekly-stat">
+                    <div class="weekly-stat-value" id="weekly-meals">0</div>
+                    <div class="weekly-stat-label">Meals Tracked</div>
+                </div>
+                <div class="weekly-stat">
+                    <div class="weekly-stat-value" id="weekly-smoothies">0</div>
+                    <div class="weekly-stat-label">Smoothies</div>
+                </div>
+                <div class="weekly-stat">
+                    <div class="weekly-stat-value" id="weekly-water">0</div>
+                    <div class="weekly-stat-label">Water Glasses</div>
+                </div>
+            </div>
+            
+            <!-- Calendar View -->
+            <div class="meal-plan-calendar">
+                <div class="calendar-header">
+                    <div class="calendar-navigation">
+                        <button id="prev-week" class="calendar-nav-btn"><i class="fas fa-chevron-left"></i></button>
+                        <h3 id="calendar-title">May 6 - May 12, 2023</h3>
+                        <button id="next-week" class="calendar-nav-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="calendar-view-options">
+                        <button id="view-weekly" class="calendar-view-btn active">Week</button>
+                        <button id="view-monthly" class="calendar-view-btn">Month</button>
+                        <button id="view-annual" class="calendar-view-btn">Year</button>
+                    </div>
+                </div>
+                
+                <div id="weekly-calendar" class="calendar-view active">
+                    <div class="calendar-weekdays">
+                        <div class="calendar-weekday">Sun</div>
+                        <div class="calendar-weekday">Mon</div>
+                        <div class="calendar-weekday">Tue</div>
+                        <div class="calendar-weekday">Wed</div>
+                        <div class="calendar-weekday">Thu</div>
+                        <div class="calendar-weekday">Fri</div>
+                        <div class="calendar-weekday">Sat</div>
+                    </div>
+                    <div class="calendar-grid" id="week-calendar-grid">
+                        <!-- JS will populate calendar days -->
+                    </div>
+                </div>
+                
+                <div id="monthly-calendar" class="calendar-view" style="display:none;">
+                    <div class="calendar-weekdays">
+                        <div class="calendar-weekday">Sun</div>
+                        <div class="calendar-weekday">Mon</div>
+                        <div class="calendar-weekday">Tue</div>
+                        <div class="calendar-weekday">Wed</div>
+                        <div class="calendar-weekday">Thu</div>
+                        <div class="calendar-weekday">Fri</div>
+                        <div class="calendar-weekday">Sat</div>
+                    </div>
+                    <div class="calendar-grid" id="month-calendar-grid">
+                        <!-- JS will populate calendar days -->
+                    </div>
+                </div>
+                
+                <div id="annual-calendar" class="calendar-view" style="display:none;">
+                    <div class="annual-grid" id="annual-grid">
+                        <!-- JS will populate annual grid -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Quick Access Panel -->
+    <div class="quick-access-panel">
+        <a href="meal-plan.html" class="quick-access-btn" title="View Meal Plan">
+            <i class="fas fa-utensils"></i>
+        </a>
+        <a href="recipe-management.html" class="quick-access-btn" title="Manage Recipes">
+            <i class="fas fa-book"></i>
+        </a>
+        <div class="quick-access-btn" id="today-btn" title="Go to Today">
+            <i class="fas fa-calendar-day"></i>
+        </div>
+    </div>
+    
+    <footer>
+        <p>&copy; 2023 Meal Prep Tracker. Created for personal use.</p>
+    </footer>
+    <script src="js/script.js"></script>
+    <script>
+        // --- Today's Smoothies Logic (shared with smoothies.html) ---
+        const TODAY_SMOOTHIES_KEY = 'todaysSmoothies';
+        function getTodaysSmoothies() {
+            try {
+                return JSON.parse(sessionStorage.getItem(TODAY_SMOOTHIES_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+        function setTodaysSmoothies(arr) {
+            sessionStorage.setItem(TODAY_SMOOTHIES_KEY, JSON.stringify(arr));
+        }
+        function renderTodaysSmoothies() {
+            const list = document.getElementById('todays-smoothies-list');
+            const section = document.getElementById('todays-smoothies-section');
+            const smoothies = getTodaysSmoothies();
+            if (!list || !section) return;
+            list.innerHTML = '';
+            if (smoothies.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+            section.style.display = '';
+            smoothies.forEach(name => {
+                const li = document.createElement('li');
+                li.style.background = '#f0f0f0';
+                li.style.padding = '0.5rem 1rem';
+                li.style.borderRadius = '20px';
+                li.style.display = 'flex';
+                li.style.alignItems = 'center';
+                li.style.gap = '0.5rem';
+                li.textContent = name;
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = '×';
+                removeBtn.title = 'Remove';
+                removeBtn.style.background = 'none';
+                removeBtn.style.border = 'none';
+                removeBtn.style.color = '#dc3545';
+                removeBtn.style.fontSize = '1.2rem';
+                removeBtn.style.cursor = 'pointer';
+                removeBtn.onclick = function() {
+                    removeSmoothieFromToday(name);
+                };
+                li.appendChild(removeBtn);
+                list.appendChild(li);
+            });
+        }
+        function removeSmoothieFromToday(name) {
+            let arr = getTodaysSmoothies();
+            arr = arr.filter(n => n !== name);
+            setTodaysSmoothies(arr);
+            renderTodaysSmoothies();
+        }
+
+        // --- Enhanced Calendar and Tracking Integration ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize date navigation with better meal plan integration
+            const selectedDate = new Date();
+            let currentView = 'weekly';
+            
+            // Initialize weekly calendar
+            function initWeeklyCalendar(date) {
+                const startOfWeek = new Date(date);
+                startOfWeek.setDate(date.getDate() - date.getDay()); // Start from Sunday
+                
+                // Update calendar title
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 6);
+                const titleFormat = { month: 'short', day: 'numeric' };
+                const yearFormat = { year: 'numeric' };
+                
+                let titleText = `${startOfWeek.toLocaleDateString('en-US', titleFormat)} - ${endOfWeek.toLocaleDateString('en-US', titleFormat)}`;
+                if (startOfWeek.getFullYear() !== endOfWeek.getFullYear()) {
+                    titleText = `${startOfWeek.toLocaleDateString('en-US', titleFormat)}, ${startOfWeek.toLocaleDateString('en-US', yearFormat)} - ${endOfWeek.toLocaleDateString('en-US', titleFormat)}, ${endOfWeek.toLocaleDateString('en-US', yearFormat)}`;
+                } else {
+                    titleText += `, ${endOfWeek.toLocaleDateString('en-US', yearFormat)}`;
+                }
+                document.getElementById('calendar-title').textContent = titleText;
+                
+                // Clear and populate calendar grid
+                const gridElement = document.getElementById('week-calendar-grid');
+                gridElement.innerHTML = '';
+                
+                // Create 7 days (Sunday to Saturday)
+                for (let i = 0; i < 7; i++) {
+                    const dayDate = new Date(startOfWeek);
+                    dayDate.setDate(startOfWeek.getDate() + i);
+                    
+                    // Create day cell
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'calendar-day';
+                    
+                    // Add today marker
+                    if (dayDate.toDateString() === new Date().toDateString()) {
+                        dayElement.classList.add('today');
+                    }
+                    
+                    // Add date number
+                    const dayNumber = document.createElement('div');
+                    dayNumber.className = 'calendar-day-number';
+                    dayNumber.textContent = dayDate.getDate();
+                    dayElement.appendChild(dayNumber);
+                    
+                    // Fetch meal plan & tracking data
+                    const dayInfo = getMealPlanAndTrackingForDate(dayDate);
+                    
+                    // Add meal info
+                    const mealsList = document.createElement('div');
+                    mealsList.className = 'calendar-day-meals';
+                    
+                    // Add breakfast
+                    if (dayInfo.breakfast) {
+                        const breakfast = document.createElement('div');
+                        breakfast.className = 'calendar-meal breakfast';
+                        if (dayInfo.breakfastCompleted) breakfast.classList.add('calendar-meal-completed');
+                        breakfast.textContent = `B: ${dayInfo.breakfast}`;
+                        breakfast.setAttribute('data-date', formatDateISO(dayDate));
+                        breakfast.setAttribute('data-meal', 'breakfast');
+                        breakfast.addEventListener('click', () => openMealDetails(dayDate, 'breakfast'));
+                        mealsList.appendChild(breakfast);
+                    }
+                    
+                    // Add lunch
+                    if (dayInfo.lunch) {
+                        const lunch = document.createElement('div');
+                        lunch.className = 'calendar-meal lunch';
+                        if (dayInfo.lunchCompleted) lunch.classList.add('calendar-meal-completed');
+                        lunch.textContent = `L: ${dayInfo.lunch}`;
+                        lunch.setAttribute('data-date', formatDateISO(dayDate));
+                        lunch.setAttribute('data-meal', 'lunch');
+                        lunch.addEventListener('click', () => openMealDetails(dayDate, 'lunch'));
+                        mealsList.appendChild(lunch);
+                    }
+                    
+                    // Add dinner
+                    if (dayInfo.dinner) {
+                        const dinner = document.createElement('div');
+                        dinner.className = 'calendar-meal dinner';
+                        if (dayInfo.dinnerCompleted) dinner.classList.add('calendar-meal-completed');
+                        dinner.textContent = `D: ${dayInfo.dinner}`;
+                        dinner.setAttribute('data-date', formatDateISO(dayDate));
+                        dinner.setAttribute('data-meal', 'dinner');
+                        dinner.addEventListener('click', () => openMealDetails(dayDate, 'dinner'));
+                        mealsList.appendChild(dinner);
+                    }
+                    
+                    // Add smoothie indicator if any
+                    if (dayInfo.smoothies && dayInfo.smoothies.length > 0) {
+                        const smoothies = document.createElement('div');
+                        smoothies.className = 'calendar-meal';
+                        smoothies.style.background = '#e8f5e9';
+                        smoothies.textContent = `🥤 ${dayInfo.smoothies.length} Smoothie${dayInfo.smoothies.length > 1 ? 's' : ''}`;
+                        mealsList.appendChild(smoothies);
+                    }
+                    
+                    dayElement.appendChild(mealsList);
+                    
+                    // Add completion indicator
+                    const completionIndicator = document.createElement('div');
+                    completionIndicator.className = 'calendar-completion-indicator';
+                    
+                    const completionProgress = document.createElement('div');
+                    completionProgress.className = 'calendar-completion-indicator-progress';
+                    completionProgress.style.width = `${dayInfo.completionPercentage}%`;
+                    
+                    completionIndicator.appendChild(completionProgress);
+                    dayElement.appendChild(completionIndicator);
+                    
+                    // Make the day clickable to navigate to that day in tracking
+                    dayElement.addEventListener('click', function(e) {
+                        // Only trigger if not clicking on a meal item
+                        if (!e.target.classList.contains('calendar-meal')) {
+                            navigateToDate(dayDate);
+                        }
+                    });
+                    
+                    gridElement.appendChild(dayElement);
+                }
+                
+                // Update weekly stats
+                updateWeeklySummaryStats(startOfWeek);
+            }
+            
+            // Initialize monthly calendar
+            function initMonthlyCalendar(date) {
+                const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+                const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+                
+                // Update calendar title
+                document.getElementById('calendar-title').textContent = 
+                    date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                
+                // Clear and populate calendar grid
+                const gridElement = document.getElementById('month-calendar-grid');
+                gridElement.innerHTML = '';
+                
+                // Add padding days for start of month
+                let startPadding = firstDay.getDay(); // 0 = Sunday
+                for (let i = 0; i < startPadding; i++) {
+                    const paddingDay = document.createElement('div');
+                    paddingDay.className = 'calendar-day inactive';
+                    gridElement.appendChild(paddingDay);
+                }
+                
+                // Add actual month days
+                for (let i = 1; i <= lastDay.getDate(); i++) {
+                    const dayDate = new Date(date.getFullYear(), date.getMonth(), i);
+                    
+                    // Create day cell
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'calendar-day';
+                    
+                    // Add today marker
+                    if (dayDate.toDateString() === new Date().toDateString()) {
+                        dayElement.classList.add('today');
+                    }
+                    
+                    // Add date number
+                    const dayNumber = document.createElement('div');
+                    dayNumber.className = 'calendar-day-number';
+                    dayNumber.textContent = i;
+                    dayElement.appendChild(dayNumber);
+                    
+                    // Fetch tracking data
+                    const dayInfo = getMealPlanAndTrackingForDate(dayDate);
+                    
+                    // Add simplified meal indicators
+                    if (dayInfo.breakfast || dayInfo.lunch || dayInfo.dinner) {
+                        const mealIndicator = document.createElement('div');
+                        mealIndicator.className = 'calendar-meal';
+                        mealIndicator.style.fontSize = '0.75rem';
+                        
+                        // Show counts using emoji icons
+                        let mealText = '';
+                        if (dayInfo.breakfast) mealText += '🍳 ';
+                        if (dayInfo.lunch) mealText += '🥗 ';
+                        if (dayInfo.dinner) mealText += '🍲 ';
+                        mealIndicator.textContent = mealText;
+                        
+                        dayElement.appendChild(mealIndicator);
+                    }
+                    
+                    // Add completion indicator
+                    const completionIndicator = document.createElement('div');
+                    completionIndicator.className = 'calendar-completion-indicator';
+                    
+                    const completionProgress = document.createElement('div');
+                    completionProgress.className = 'calendar-completion-indicator-progress';
+                    completionProgress.style.width = `${dayInfo.completionPercentage}%`;
+                    
+                    completionIndicator.appendChild(completionProgress);
+                    dayElement.appendChild(completionIndicator);
+                    
+                    // Make the day clickable to navigate to that day in tracking
+                    dayElement.addEventListener('click', function() {
+                        navigateToDate(dayDate);
+                    });
+                    
+                    gridElement.appendChild(dayElement);
+                }
+                
+                // Add padding days for end of month
+                const endPadding = 6 - lastDay.getDay(); // 6 = Saturday
+                for (let i = 0; i < endPadding; i++) {
+                    const paddingDay = document.createElement('div');
+                    paddingDay.className = 'calendar-day inactive';
+                    gridElement.appendChild(paddingDay);
+                }
+            }
+            
+            // Initialize annual calendar
+            function initAnnualCalendar(date) {
+                const year = date.getFullYear();
+                
+                // Update calendar title
+                document.getElementById('calendar-title').textContent = year;
+                
+                // Clear and populate annual grid
+                const gridElement = document.getElementById('annual-grid');
+                gridElement.innerHTML = '';
+                
+                // Create 52 weeks
+                for (let week = 0; week < 52; week++) {
+                    const weekElement = document.createElement('div');
+                    weekElement.className = 'annual-week';
+                    
+                    // Create 7 days per week
+                    for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+                        // Calculate actual date
+                        const dayOfYear = week * 7 + dayOfWeek;
+                        const dayDate = new Date(year, 0, dayOfYear + 1);
+                        
+                        // Skip days not in the year
+                        if (dayDate.getFullYear() !== year) continue;
+                        
+                        const dayElement = document.createElement('div');
+                        dayElement.className = 'annual-day';
+                        
+                        // Add today marker
+                        if (dayDate.toDateString() === new Date().toDateString()) {
+                            dayElement.style.border = '2px solid var(--primary-color)';
+                        }
+                        
+                        // Fetch tracking data
+                        const dayInfo = getMealPlanAndTrackingForDate(dayDate);
+                        
+                        // Set color based on completion
+                        if (dayInfo.completionPercentage >= 100) {
+                            dayElement.classList.add('completion-100');
+                        } else if (dayInfo.completionPercentage >= 75) {
+                            dayElement.classList.add('completion-75');
+                        } else if (dayInfo.completionPercentage >= 50) {
+                            dayElement.classList.add('completion-50');
+                        } else if (dayInfo.completionPercentage > 0) {
+                            dayElement.classList.add('completion-25');
+                        } else {
+                            dayElement.classList.add('completion-0');
+                        }
+                        
+                        // Add tooltip
+                        const tooltip = document.createElement('div');
+                        tooltip.className = 'annual-day-tooltip';
+                        tooltip.textContent = `${dayDate.toLocaleDateString()} - ${dayInfo.completionPercentage}% completed`;
+                        
+                        // Make the day clickable to navigate to that day in tracking
+                        dayElement.addEventListener('click', function() {
+                            navigateToDate(dayDate);
+                        });
+                        
+                        dayElement.appendChild(tooltip);
+                        weekElement.appendChild(dayElement);
+                    }
+                    
+                    gridElement.appendChild(weekElement);
+                }
+            }
+            
+            // Fetch meal plan and tracking data for a specific date
+            function getMealPlanAndTrackingForDate(date) {
+                // This is a placeholder that will connect to your existing data structures
+                // Adjust based on how your data is stored
+                const dateStr = formatDateISO(date);
+                
+                // Get meal plan data
+                const mealPlan = getMealPlanForDate(date);
+                
+                // Get tracking data
+                const trackingData = getTrackingForDate(date);
+                
+                // Calculate completion percentage based on how many meals/items were completed
+                const totalItems = Object.keys(trackingData).length > 0 ? 3 + (trackingData.smoothies?.length || 0) : 0; // 3 meals + smoothies
+                const completedItems = 
+                    (trackingData.breakfastCompleted ? 1 : 0) + 
+                    (trackingData.lunchCompleted ? 1 : 0) + 
+                    (trackingData.dinnerCompleted ? 1 : 0) +
+                    (trackingData.smoothies?.length || 0);
+                
+                const completionPercentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+                
+                return {
+                    breakfast: mealPlan.breakfast || '',
+                    lunch: mealPlan.lunch || '',
+                    dinner: mealPlan.dinner || '',
+                    breakfastCompleted: trackingData.breakfastCompleted || false,
+                    lunchCompleted: trackingData.lunchCompleted || false,
+                    dinnerCompleted: trackingData.dinnerCompleted || false,
+                    smoothies: trackingData.smoothies || [],
+                    completionPercentage: completionPercentage
+                };
+            }
+            
+            // Get meal plan for a date
+            function getMealPlanForDate(date) {
+                // Link to the global function from script.js if available
+                if (window.getMealForDate) {
+                    return window.getMealForDate(date) || {};
+                }
+                
+                // Fallback - replace with your actual data source
+                return {
+                    breakfast: `Breakfast for ${date.toLocaleDateString()}`,
+                    lunch: `Lunch for ${date.toLocaleDateString()}`,
+                    dinner: `Dinner for ${date.toLocaleDateString()}`
+                };
+            }
+            
+            // Get tracking data for a date
+            function getTrackingForDate(date) {
+                const trackingData = localStorage.getItem('trackingData');
+                if (!trackingData) return {};
+                
+                const parsedData = JSON.parse(trackingData);
+                const dateStr = formatDateISO(date);
+                return parsedData[dateStr] || {};
+            }
+            
+            // Format date to YYYY-MM-DD
+            function formatDateISO(date) {
+                return date.toISOString().split('T')[0];
+            }
+            
+            // Update weekly summary stats
+            function updateWeeklySummaryStats(startOfWeek) {
+                let totalCompletionPercentage = 0;
+                let totalMealsTracked = 0;
+                let totalSmoothies = 0;
+                let totalWaterGlasses = 0;
+                
+                // Calculate for the week (7 days)
+                for (let i = 0; i < 7; i++) {
+                    const dayDate = new Date(startOfWeek);
+                    dayDate.setDate(startOfWeek.getDate() + i);
+                    
+                    const dayInfo = getMealPlanAndTrackingForDate(dayDate);
+                    const trackingData = getTrackingForDate(dayDate);
+                    
+                    totalCompletionPercentage += dayInfo.completionPercentage;
+                    
+                    // Count meals
+                    if (trackingData.breakfastCompleted) totalMealsTracked++;
+                    if (trackingData.lunchCompleted) totalMealsTracked++;
+                    if (trackingData.dinnerCompleted) totalMealsTracked++;
+                    
+                    // Count smoothies
+                    if (trackingData.smoothies) {
+                        totalSmoothies += trackingData.smoothies.length;
+                    }
+                    
+                    // Count water glasses
+                    if (trackingData.water) {
+                        if (trackingData.water.selman) totalWaterGlasses += trackingData.water.selman;
+                        if (trackingData.water.aybike) totalWaterGlasses += trackingData.water.aybike;
+                    }
+                }
+                
+                // Update stats display
+                document.getElementById('weekly-completion').textContent = `${Math.round(totalCompletionPercentage / 7)}%`;
+                document.getElementById('weekly-meals').textContent = totalMealsTracked;
+                document.getElementById('weekly-smoothies').textContent = totalSmoothies;
+                document.getElementById('weekly-water').textContent = totalWaterGlasses;
+            }
+            
+            // Navigate to a specific date
+            function navigateToDate(date) {
+                // Update current tracking date
+                window.selectedDate = date;
+                
+                // Update display
+                document.getElementById('current-date').textContent = date.toLocaleDateString('en-US', {
+                    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+                });
+                
+                // Calculate day number in the cycle (assuming 30-day cycle starting May 6, 2023)
+                const startDate = new Date(2023, 4, 6); // May 6, 2023
+                const timeDiff = date.getTime() - startDate.getTime();
+                const dayDiff = Math.floor(timeDiff / (1000 * 3600 * 24));
+                const cycleDay = (dayDiff % 30) + 1;
+                document.getElementById('day-number').textContent = `Day ${cycleDay} of 30`;
+                
+                // Load meal data
+                loadMealDataForDate(date);
+                
+                // Load tracking data
+                loadTrackingDataForDate(date);
+                
+                // Remove automatic scrolling behavior
+                // document.querySelector('.tracking-section').scrollIntoView({ behavior: 'smooth' });
+            }
+            
+            // Load meal data for selected date
+            function loadMealDataForDate(date) {
+                const mealPlan = getMealPlanForDate(date);
+                
+                // Update meal details
+                document.getElementById('breakfast-details').textContent = mealPlan.breakfast || 'No meal planned';
+                document.getElementById('lunch-details').textContent = mealPlan.lunch || 'No meal planned';
+                document.getElementById('dinner-details').textContent = mealPlan.dinner || 'No meal planned';
+                
+                // Add click handlers for recipe details
+                document.getElementById('breakfast-details').onclick = () => openMealDetails(date, 'breakfast');
+                document.getElementById('lunch-details').onclick = () => openMealDetails(date, 'lunch');
+                document.getElementById('dinner-details').onclick = () => openMealDetails(date, 'dinner');
+            }
+            
+            // Load tracking data for selected date
+            function loadTrackingDataForDate(date) {
+                const trackingData = getTrackingForDate(date);
+                
+                // Update checkboxes
+                document.getElementById('breakfast-completed').checked = trackingData.breakfastCompleted || false;
+                document.getElementById('lunch-completed').checked = trackingData.lunchCompleted || false;
+                document.getElementById('dinner-completed').checked = trackingData.dinnerCompleted || false;
+                document.getElementById('breakfast-smoothie').checked = trackingData.breakfastSmoothie || false;
+                document.getElementById('lunch-smoothie').checked = trackingData.lunchSmoothie || false;
+                document.getElementById('dinner-smoothie').checked = trackingData.dinnerSmoothie || false;
+                document.getElementById('extra-smoothie').checked = trackingData.extraSmoothie || false;
+                
+                // Update notes
+                document.getElementById('breakfast-notes').value = trackingData.breakfastNotes || '';
+                document.getElementById('lunch-notes').value = trackingData.lunchNotes || '';
+                document.getElementById('dinner-notes').value = trackingData.dinnerNotes || '';
+                document.getElementById('smoothie-notes').value = trackingData.smoothieNotes || '';
+                
+                // Update water glasses
+                if (trackingData.water) {
+                    // Update Selman's glasses
+                    if (trackingData.water.selman) {
+                        document.querySelectorAll('.selman-glass').forEach((glass, index) => {
+                            if (index < trackingData.water.selman) {
+                                glass.classList.add('filled');
+                            } else {
+                                glass.classList.remove('filled');
+                            }
+                        });
+                    } else {
+                        document.querySelectorAll('.selman-glass').forEach(glass => {
+                            glass.classList.remove('filled');
+                        });
+                    }
+                    
+                    // Update Aybike's glasses
+                    if (trackingData.water.aybike) {
+                        document.querySelectorAll('.aybike-glass').forEach((glass, index) => {
+                            if (index < trackingData.water.aybike) {
+                                glass.classList.add('filled');
+                            } else {
+                                glass.classList.remove('filled');
+                            }
+                        });
+                    } else {
+                        document.querySelectorAll('.aybike-glass').forEach(glass => {
+                            glass.classList.remove('filled');
+                        });
+                    }
+                } else {
+                    // Reset all glasses
+                    document.querySelectorAll('.selman-glass, .aybike-glass').forEach(glass => {
+                        glass.classList.remove('filled');
+                    });
+                }
+                
+                // Update completion rate
+                updateCompletionRate();
+            }
+            
+            // Update completion rate display
+            function updateCompletionRate() {
+                // Calculate completion based on checkboxes
+                let completed = 0;
+                let total = 3; // Breakfast, lunch, dinner
+                
+                if (document.getElementById('breakfast-completed').checked) completed++;
+                if (document.getElementById('lunch-completed').checked) completed++;
+                if (document.getElementById('dinner-completed').checked) completed++;
+                
+                // Add smoothie checkboxes
+                if (document.getElementById('breakfast-smoothie').checked) {
+                    total++;
+                    if (document.getElementById('breakfast-smoothie').checked) completed++;
+                }
+                if (document.getElementById('lunch-smoothie').checked) {
+                    total++;
+                    if (document.getElementById('lunch-smoothie').checked) completed++;
+                }
+                if (document.getElementById('dinner-smoothie').checked) {
+                    total++;
+                    if (document.getElementById('dinner-smoothie').checked) completed++;
+                }
+                if (document.getElementById('extra-smoothie').checked) {
+                    total++;
+                    if (document.getElementById('extra-smoothie').checked) completed++;
+                }
+                
+                // Calculate percentage
+                const percentage = Math.round((completed / total) * 100);
+                
+                // Update display
+                document.querySelector('.progress-fill').style.width = `${percentage}%`;
+                document.getElementById('completion-percent').textContent = `${percentage}%`;
+                
+                return percentage;
+            }
+            
+            // Open meal details (recipe)
+            function openMealDetails(date, mealType) {
+                const mealPlan = getMealPlanForDate(date);
+                const recipeData = mealPlan[`${mealType}Recipe`];
+                
+                if (recipeData) {
+                    alert(`Recipe for ${mealType}: ${recipeData.title}\nIngredients: ${recipeData.ingredients.join(', ')}\nInstructions: ${recipeData.instructions.join(' ')}`);
+                    
+                    // Could be expanded to open a modal with recipe details
+                } else {
+                    alert(`No recipe available for ${mealType} on ${date.toLocaleDateString()}`);
+                }
+            }
+            
+            // Save tracking data
+            document.getElementById('save-day').addEventListener('click', function() {
+                const date = window.selectedDate || new Date();
+                const dateStr = formatDateISO(date);
+                
+                // Get water counts
+                const selmanWaterCount = document.querySelectorAll('.selman-glass.filled').length;
+                const aybikeWaterCount = document.querySelectorAll('.aybike-glass.filled').length;
+                
+                // Collect data
+                const dayData = {
+                    breakfastCompleted: document.getElementById('breakfast-completed').checked,
+                    lunchCompleted: document.getElementById('lunch-completed').checked,
+                    dinnerCompleted: document.getElementById('dinner-completed').checked,
+                    breakfastSmoothie: document.getElementById('breakfast-smoothie').checked,
+                    lunchSmoothie: document.getElementById('lunch-smoothie').checked,
+                    dinnerSmoothie: document.getElementById('dinner-smoothie').checked,
+                    extraSmoothie: document.getElementById('extra-smoothie').checked,
+                    breakfastNotes: document.getElementById('breakfast-notes').value,
+                    lunchNotes: document.getElementById('lunch-notes').value,
+                    dinnerNotes: document.getElementById('dinner-notes').value,
+                    smoothieNotes: document.getElementById('smoothie-notes').value,
+                    water: {
+                        selman: selmanWaterCount,
+                        aybike: aybikeWaterCount
+                    },
+                    smoothies: getTodaysSmoothies(),
+                    completionPercentage: updateCompletionRate()
+                };
+                
+                // Save to localStorage
+                const trackingData = localStorage.getItem('trackingData');
+                const parsedData = trackingData ? JSON.parse(trackingData) : {};
+                parsedData[dateStr] = dayData;
+                localStorage.setItem('trackingData', JSON.stringify(parsedData));
+                
+                // Update display
+                alert('Progress saved successfully!');
+                
+                // Update calendar view
+                refreshCalendarView();
+                
+                // Update stats
+                updateGlobalStats();
+            });
+            
+            // Calendar view navigation
+            document.getElementById('prev-week').addEventListener('click', function() {
+                const date = window.selectedDate || new Date();
+                
+                if (currentView === 'weekly') {
+                    date.setDate(date.getDate() - 7); // Go to previous week
+                    initWeeklyCalendar(date);
+                } else if (currentView === 'monthly') {
+                    date.setMonth(date.getMonth() - 1); // Go to previous month
+                    initMonthlyCalendar(date);
+                } else if (currentView === 'annual') {
+                    date.setFullYear(date.getFullYear() - 1); // Go to previous year
+                    initAnnualCalendar(date);
+                }
+                
+                window.selectedDate = date;
+            });
+            
+            document.getElementById('next-week').addEventListener('click', function() {
+                const date = window.selectedDate || new Date();
+                
+                if (currentView === 'weekly') {
+                    date.setDate(date.getDate() + 7); // Go to next week
+                    initWeeklyCalendar(date);
+                } else if (currentView === 'monthly') {
+                    date.setMonth(date.getMonth() + 1); // Go to next month
+                    initMonthlyCalendar(date);
+                } else if (currentView === 'annual') {
+                    date.setFullYear(date.getFullYear() + 1); // Go to next year
+                    initAnnualCalendar(date);
+                }
+                
+                window.selectedDate = date;
+            });
+            
+            // View switching
+            document.getElementById('view-weekly').addEventListener('click', function() {
+                document.getElementById('weekly-calendar').style.display = '';
+                document.getElementById('monthly-calendar').style.display = 'none';
+                document.getElementById('annual-calendar').style.display = 'none';
+                
+                document.getElementById('view-weekly').classList.add('active');
+                document.getElementById('view-monthly').classList.remove('active');
+                document.getElementById('view-annual').classList.remove('active');
+                
+                currentView = 'weekly';
+                initWeeklyCalendar(window.selectedDate || new Date());
+            });
+            
+            document.getElementById('view-monthly').addEventListener('click', function() {
+                document.getElementById('weekly-calendar').style.display = 'none';
+                document.getElementById('monthly-calendar').style.display = '';
+                document.getElementById('annual-calendar').style.display = 'none';
+                
+                document.getElementById('view-weekly').classList.remove('active');
+                document.getElementById('view-monthly').classList.add('active');
+                document.getElementById('view-annual').classList.remove('active');
+                
+                currentView = 'monthly';
+                initMonthlyCalendar(window.selectedDate || new Date());
+            });
+            
+            document.getElementById('view-annual').addEventListener('click', function() {
+                document.getElementById('weekly-calendar').style.display = 'none';
+                document.getElementById('monthly-calendar').style.display = 'none';
+                document.getElementById('annual-calendar').style.display = '';
+                
+                document.getElementById('view-weekly').classList.remove('active');
+                document.getElementById('view-monthly').classList.remove('active');
+                document.getElementById('view-annual').classList.add('active');
+                
+                currentView = 'annual';
+                initAnnualCalendar(window.selectedDate || new Date());
+            });
+            
+            // Today button
+            document.getElementById('today-btn').addEventListener('click', function() {
+                window.selectedDate = new Date();
+                
+                if (currentView === 'weekly') {
+                    initWeeklyCalendar(window.selectedDate);
+                } else if (currentView === 'monthly') {
+                    initMonthlyCalendar(window.selectedDate);
+                } else {
+                    initAnnualCalendar(window.selectedDate);
+                }
+                
+                navigateToDate(window.selectedDate);
+            });
+            
+            // Update global stats
+            function updateGlobalStats() {
+                const trackingData = localStorage.getItem('trackingData');
+                if (!trackingData) return;
+                
+                const parsedData = JSON.parse(trackingData);
+                const dates = Object.keys(parsedData);
+                
+                // Calculate days tracked
+                document.getElementById('days-tracked').textContent = `${dates.length}/30`;
+                
+                // Calculate success rate
+                let totalCompletionPercentage = 0;
+                dates.forEach(date => {
+                    totalCompletionPercentage += parsedData[date].completionPercentage || 0;
+                });
+                const averageCompletion = dates.length > 0 ? Math.round(totalCompletionPercentage / dates.length) : 0;
+                document.getElementById('success-rate').textContent = `${averageCompletion}%`;
+                
+                // Calculate current streak
+                let streak = 0;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                for (let i = 0; i < 30; i++) {
+                    const checkDate = new Date(today);
+                    checkDate.setDate(today.getDate() - i);
+                    const checkDateStr = formatDateISO(checkDate);
+                    
+                    if (parsedData[checkDateStr] && parsedData[checkDateStr].completionPercentage >= 50) {
+                        streak++;
+                    } else if (i > 0) {
+                        // Break the streak when we find a missed day (but ignore today)
+                        break;
+                    }
+                }
+                
+                document.getElementById('current-streak').textContent = `${streak} days`;
+                
+                // Calculate achievements
+                // This is a placeholder - you could define different achievements
+                let achievements = 0;
+                if (streak >= 3) achievements++;
+                if (streak >= 7) achievements++;
+                if (dates.length >= 10) achievements++;
+                if (averageCompletion >= 80) achievements++;
+                
+                document.getElementById('achievements-count').textContent = achievements;
+            }
+            
+            // Refresh calendar view based on current mode
+            function refreshCalendarView() {
+                if (currentView === 'weekly') {
+                    initWeeklyCalendar(window.selectedDate || new Date());
+                } else if (currentView === 'monthly') {
+                    initMonthlyCalendar(window.selectedDate || new Date());
+                } else {
+                    initAnnualCalendar(window.selectedDate || new Date());
+                }
+            }
+            
+            // Day/meal navigation
+            document.getElementById('prev-day').addEventListener('click', function() {
+                const date = window.selectedDate || new Date();
+                date.setDate(date.getDate() - 1);
+                navigateToDate(date);
+            });
+            
+            document.getElementById('next-day').addEventListener('click', function() {
+                const date = window.selectedDate || new Date();
+                date.setDate(date.getDate() + 1);
+                navigateToDate(date);
+            });
+            
+            // Initialize page
+            window.selectedDate = new Date(); // Today's date
+            navigateToDate(window.selectedDate);
+            initWeeklyCalendar(window.selectedDate);
+            updateGlobalStats();
+        });
+        
+        // Initial render
+        renderTodaysSmoothies();
+    </script>
+</body>
+</html>

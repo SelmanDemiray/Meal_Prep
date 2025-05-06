@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Management | Meal Prep Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/enhanced-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Meal Prep Tracker</h1>
+        <div class="mobile-menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <div class="nav-left-group">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="smoothies.html">Smoothies</a></li>
+                    <li><a href="nutrition.html">Nutrition</a></li>
+                </div>
+                <div class="nav-right-group">
+                    <li><a href="meal-plan.html">Meal Plan</a></li>
+                    <li><a href="tracking.html">Track Meals</a></li>
+                    <li><a href="recipe-management.html" class="active">Recipes</a></li>
+                </div>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="recipe-management" class="page-content recipe-manager">
+        <section class="hero recipe-hero">
+            <h2>Recipe Management</h2>
+            <p>Create and manage recipe cycles with easy import from TheMealDB's database of 300+ meals</p>
+        </section>
+
+        <!-- Calendar integration message -->
+        <div class="calendar-integration-message">
+            <div class="meal-plan-calendar mb-3">
+                <div class="calendar-header">
+                    <div class="calendar-navigation">
+                        <button id="prev-week" class="calendar-nav-btn"><i class="fas fa-chevron-left"></i></button>
+                        <h3 id="calendar-title">May 6 - May 12, 2023</h3>
+                        <button id="next-week" class="calendar-nav-btn"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div id="mini-calendar" class="calendar-view">
+                    <div class="calendar-weekdays">
+                        <div class="calendar-weekday">Sun</div>
+                        <div class="calendar-weekday">Mon</div>
+                        <div class="calendar-weekday">Tue</div>
+                        <div class="calendar-weekday">Wed</div>
+                        <div class="calendar-weekday">Thu</div>
+                        <div class="calendar-weekday">Fri</div>
+                        <div class="calendar-weekday">Sat</div>
+                    </div>
+                    <div class="calendar-grid" id="mini-calendar-grid">
+                        <!-- JS will populate calendar days -->
+                    </div>
+                </div>
+                <p class="text-center mt-3">Click on any day to view and edit recipes for that date</p>
+            </div>
+        </div>
+
+        <div id="recipe-management" class="recipe-manager">
+            <div class="cycle-selector">
+                <h3>Select Recipe Cycle</h3>
+                <div class="selector-controls">
+                    <select id="manage-cycle-selector" class="form-control"></select>
+                    <button id="new-cycle-btn" class="btn"><i class="fas fa-plus"></i> New Cycle</button>
+                    <button id="import-cycle-btn" class="btn btn-secondary"><i class="fas fa-cloud-download-alt"></i> Import Entire Cycle</button>
+                </div>
+                <h3 id="cycle-name-display" class="mt-3"></h3>
+            </div>
+
+            <div class="recipe-form-section">
+                <h3>Edit Recipe</h3>
+                
+                <div class="day-meal-selector">
+                    <div class="form-group">
+                        <label for="manage-day-selector">Day:</label>
+                        <select id="manage-day-selector" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="manage-meal-selector">Meal:</label>
+                        <select id="manage-meal-selector" class="form-control">
+                            <option value="breakfast">Breakfast</option>
+                            <option value="lunch">Lunch</option>
+                            <option value="dinner">Dinner</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button id="search-recipe-btn" class="btn"><i class="fas fa-search"></i> Search TheMealDB</button>
+                    </div>
+                </div>
+
+                <form id="recipe-form">
+                    <div class="form-group">
+                        <label for="recipe-title">Recipe Title:</label>
+                        <input type="text" id="recipe-title" class="form-control" placeholder="Enter recipe title">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="meal-description">Meal Description:</label>
+                        <input type="text" id="meal-description" class="form-control" placeholder="Enter shorter meal description for calendar">
+                    </div>
+                    
+                    <div class="recipe-form-section">
+                        <div class="section-header">
+                            <h4>Ingredients:</h4>
+                            <button type="button" id="add-ingredient-btn" class="add-item-btn"><i class="fas fa-plus"></i> Add Ingredient</button>
+                        </div>
+                        <div id="ingredients-list" class="list-container"></div>
+                    </div>
+                    
+                    <div class="recipe-form-section">
+                        <div class="section-header">
+                            <h4>Instructions:</h4>
+                            <button type="button" id="add-instruction-btn" class="add-item-btn"><i class="fas fa-plus"></i> Add Step</button>
+                        </div>
+                        <div id="instructions-list" class="list-container"></div>
+                    </div>
+                    
+                    <div class="recipe-form-section">
+                        <div class="section-header">
+                            <h4>Integration Options:</h4>
+                        </div>
+                        <div class="integration-options">
+                            <div class="form-group">
+                                <label for="tracking-status">Tracking Status:</label>
+                                <select id="tracking-status" class="form-control">
+                                    <option value="not-started">Not Started</option>
+                                    <option value="in-progress">In Progress</option>
+                                    <option value="completed">Completed</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="add-to-tracking"> Add to Today's Tracking
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-lg"><i class="fas fa-save"></i> Save Recipe</button>
+                </form>
+            </div>
+            
+            <div class="mealdb-info">
+                <h3>About TheMealDB</h3>
+                <p>TheMealDB is an open, crowd-sourced database of recipes from around the world. With this integration, you can:</p>
+                <ul>
+                    <li>Search and import individual recipes into your meal plan</li>
+                    <li>Auto-populate entire 30-day meal cycles with recipes by category</li>
+                    <li>Discover recipes by ingredient or cuisine type</li>
+                    <li>Access 300+ meals and 575+ ingredients with no API key needed</li>
+                </ul>
+                <p class="credit">Powered by <a href="https://www.themealdb.com/" target="_blank">TheMealDB</a></p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Quick Access Panel -->
+    <div class="quick-access-panel">
+        <a href="meal-plan.html" class="quick-access-btn" title="View Meal Plan">
+            <i class="fas fa-utensils"></i>
+        </a>
+        <a href="tracking.html" class="quick-access-btn" title="Track Meals">
+            <i class="fas fa-check-square"></i>
+        </a>
+        <div class="quick-access-btn" id="today-btn" title="Go to Today">
+            <i class="fas fa-calendar-day"></i>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Meal Prep Tracker. Created for personal use.</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the mini calendar
+            const miniCalendarGrid = document.getElementById('mini-calendar-grid');
+            if (miniCalendarGrid) {
+                // Create a simplified weekly calendar
+                const today = new Date();
+                const startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+                
+                // Update calendar title
+                document.getElementById('calendar-title').textContent = 
+                    `${startOfWeek.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} - 
+                     ${new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}`;
+                
+                // Create 7 days (Sunday to Saturday)
+                for (let i = 0; i < 7; i++) {
+                    const dayDate = new Date(startOfWeek);
+                    dayDate.setDate(startOfWeek.getDate() + i);
+                    
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'calendar-day';
+                    
+                    if (dayDate.toDateString() === today.toDateString()) {
+                        dayElement.classList.add('today');
+                    }
+                    
+                    const dayNumber = document.createElement('div');
+                    dayNumber.className = 'calendar-day-number';
+                    dayNumber.textContent = dayDate.getDate();
+                    dayElement.appendChild(dayNumber);
+                    
+                    // Add a click handler to select this day for editing
+                    dayElement.addEventListener('click', function() {
+                        // Find the day in the cycle and update selectors
+                        const cycleDay = calculateCycleDayFromDate(dayDate);
+                        if (document.getElementById('manage-day-selector')) {
+                            document.getElementById('manage-day-selector').value = cycleDay;
+                            // Trigger a change event to update the form
+                            const event = new Event('change');
+                            document.getElementById('manage-day-selector').dispatchEvent(event);
+                        }
+                    });
+                    
+                    miniCalendarGrid.appendChild(dayElement);
+                }
+            }
+            
+            // Calculate cycle day from date
+            function calculateCycleDayFromDate(date) {
+                const startDate = new Date(2023, 4, 6); // May 6, 2023 (cycle start)
+                const dayDiff = Math.round((date - startDate) / (24 * 60 * 60 * 1000));
+                return (dayDiff % 30); // 0-29 for a 30-day cycle
+            }
+            
+            // Calendar navigation
+            document.getElementById('prev-week').addEventListener('click', function() {
+                // Implement previous week navigation
+                alert('Previous week navigation will be implemented');
+            });
+            
+            document.getElementById('next-week').addEventListener('click', function() {
+                // Implement next week navigation
+                alert('Next week navigation will be implemented');
+            });
+            
+            // Today button in quick access panel
+            document.getElementById('today-btn').addEventListener('click', function() {
+                // Set the day selector to today's cycle day
+                const cycleDay = calculateCycleDayFromDate(new Date());
+                if (document.getElementById('manage-day-selector')) {
+                    document.getElementById('manage-day-selector').value = cycleDay;
+                    // Trigger a change event to update the form
+                    const event = new Event('change');
+                    document.getElementById('manage-day-selector').dispatchEvent(event);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

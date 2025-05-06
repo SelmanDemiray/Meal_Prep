@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Plan | Meal Prep Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/enhanced-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <h1>Meal Prep Tracker</h1>
+        <div class="mobile-menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <div class="nav-left-group">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="smoothies.html">Smoothies</a></li>
+                    <li><a href="nutrition.html">Nutrition</a></li>
+                </div>
+                <div class="nav-right-group">
+                    <li><a href="meal-plan.html" class="active">Meal Plan</a></li>
+                    <li><a href="tracking.html">Track Meals</a></li>
+                    <li><a href="recipe-management.html">Recipes</a></li>
+                </div>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="page-content">
+        <section class="hero meal-plan-hero mb-4">
+            <h2>Weekly Meal Plan</h2>
+            <p>Your personalized 30-day meal schedule with cultural variety and nutritional balance.</p>
+        </section>
+        
+        <!-- Calendar View -->
+        <section class="meal-plan-calendar">
+            <div class="calendar-header">
+                <div class="calendar-navigation">
+                    <button id="prev-week" class="calendar-nav-btn"><i class="fas fa-chevron-left"></i></button>
+                    <h3 id="calendar-title">May 6 - May 12, 2023</h3>
+                    <button id="next-week" class="calendar-nav-btn"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-view-options">
+                    <button id="view-weekly" class="calendar-view-btn active">Week</button>
+                    <button id="view-monthly" class="calendar-view-btn">Month</button>
+                    <button id="view-annual" class="calendar-view-btn">Year</button>
+                </div>
+            </div>
+            
+            <div id="weekly-calendar" class="calendar-view active">
+                <div class="calendar-weekdays">
+                    <div class="calendar-weekday">Sun</div>
+                    <div class="calendar-weekday">Mon</div>
+                    <div class="calendar-weekday">Tue</div>
+                    <div class="calendar-weekday">Wed</div>
+                    <div class="calendar-weekday">Thu</div>
+                    <div class="calendar-weekday">Fri</div>
+                    <div class="calendar-weekday">Sat</div>
+                </div>
+                <div class="calendar-grid" id="week-calendar-grid">
+                    <!-- JS will populate calendar days -->
+                </div>
+            </div>
+            
+            <div id="monthly-calendar" class="calendar-view" style="display:none;">
+                <div class="calendar-weekdays">
+                    <div class="calendar-weekday">Sun</div>
+                    <div class="calendar-weekday">Mon</div>
+                    <div class="calendar-weekday">Tue</div>
+                    <div class="calendar-weekday">Wed</div>
+                    <div class="calendar-weekday">Thu</div>
+                    <div class="calendar-weekday">Fri</div>
+                    <div class="calendar-weekday">Sat</div>
+                </div>
+                <div class="calendar-grid" id="month-calendar-grid">
+                    <!-- JS will populate calendar days -->
+                </div>
+            </div>
+            
+            <div id="annual-calendar" class="calendar-view" style="display:none;">
+                <div class="annual-grid" id="annual-grid">
+                    <!-- JS will populate annual grid -->
+                </div>
+            </div>
+        </section>
+        
+        <section class="cycle-management mb-4">
+            <div id="cycle-manager" class="cycle-selector mb-3">
+                <label for="view-cycle-selector">Select Meal Cycle:</label>
+                <div class="selector-controls">
+                    <select id="view-cycle-selector" class="form-control"></select>
+                    <a href="recipe-management.html" class="btn"><i class="fas fa-edit"></i> Manage Recipes</a>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab-btn active" onclick="showWeek(1)">Week 1</button>
+                <button class="tab-btn" onclick="showWeek(2)">Week 2</button>
+                <button class="tab-btn" onclick="showWeek(3)">Week 3</button>
+                <button class="tab-btn" onclick="showWeek(4)">Week 4</button>
+                <button class="tab-btn" onclick="showWeek(5)">Bonus Days</button>
+            </div>
+
+            <div id="week1" class="meal-week active">
+                <h3>Week 1</h3>
+                <div class="table-responsive">
+                    <table class="meal-table">
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Breakfast</th>
+                                <th>Lunch</th>
+                                <th>Dinner</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>1</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="0">Veggie omelet (eggs, spinach, mushrooms) + whole-grain toast</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="0">Grilled chicken salad (mixed greens, tomato, cucumber, olive oil)</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="0">Baked salmon, quinoa, steamed broccoli</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>2</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="1">Overnight oats with almond butter, banana, chia seeds</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="1">Turkey-hummus wrap, bell peppers</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="1">Beef-and-mixed-veg stir-fry over brown rice</span></td>
+                            </tr>
+                            <tr class="highlight">
+                                <td><strong>3</strong> ★ Mongolian</td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="2">Scrambled eggs with scallions + whole-grain English muffin</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="2">Halal Mongolian beef (lean flank steak, soy-ginger sauce) with jasmine rice</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="2">Cabbage-and-beef soup, whole-grain roll</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>4</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="3">Greek yogurt parfait (granola, strawberries, walnuts)</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="3">Lentil soup + side salad</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="3">Grilled shrimp tacos (corn tortillas, slaw, avocado)</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>5</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="4">Avocado toast + poached egg, spinach</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="4">Quinoa Buddha bowl (roasted chickpeas, sweet potato, kale)</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="4">Turkey meatballs with tomato sauce over zucchini noodles</span></td>
+                            </tr>
+                            <tr class="highlight">
+                                <td><strong>6</strong> ★ Turkish</td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="5">Menemen (Turkish eggs with tomato & peppers) on whole-grain toast</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="5">Chicken kebab plate (rice pilaf, cucumber-yogurt salad)</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="5">Stuffed eggplant (imam bayıldı) with bulgur</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>7</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="6">Buckwheat porridge with berries</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="6">Tuna-avocado salad</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="6">Grilled lamb chops, roasted vegetables, couscous</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="week2" class="meal-week">
+                <h3>Week 2</h3>
+                <div class="table-responsive">
+                    <table class="meal-table">
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Breakfast</th>
+                                <th>Lunch</th>
+                                <th>Dinner</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>8</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="7">Spinach-pineapple-protein smoothie bowl</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="7">Chickpea salad with feta, cucumber, olives</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="7">Fish tacos with cabbage slaw</span></td>
+                            </tr>
+                            <tr class="highlight">
+                                <td><strong>9</strong> ★ Canadian</td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="8">Whole-grain maple-banana pancakes + turkey bacon</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="8">Salmon chowder + whole-grain roll</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="8">Bison burger on whole-grain bun, sweet potato fries</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>10</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="9">Spinach-feta omelet</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="9">Beef chili (beans, tomatoes)</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="9">Baked cod, wild rice, asparagus</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>11</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="10">Chia pudding with raspberries</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="10">Turkey chili</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="10">Tofu stir-fry (mixed veg, soba noodles)</span></td>
+                            </tr>
+                            <tr class="highlight">
+                                <td><strong>12</strong> ★ Mongolian</td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="11">Protein pancakes with berries</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="11">Mongolian chicken (lean breast, garlic-soy) over brown rice</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="11">Stuffed cabbage rolls (beef & rice)</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>13</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="12">Smoothie (banana, mango, spinach, Greek yogurt)</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="12">Quinoa salad (mixed veg, lemon-olive oil)</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="12">Grilled lamb chops, quinoa, sautéed kale</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>14</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="13">Kale–mango smoothie bowl</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="13">Lentil soup + side salad</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="13">Chicken coconut curry with brown rice</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="week3" class="meal-week">
+                <h3>Week 3</h3>
+                <div class="table-responsive">
+                    <table class="meal-table">
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Breakfast</th>
+                                <th>Lunch</th>
+                                <th>Dinner</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="highlight">
+                                <td><strong>15</strong> ★ Turkish</td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="14">Simit (sesame bagel) with labneh & olives</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="14">Lentil köfte salad</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="14">Turkish lamb pilaf (apricot, mint)</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>16</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="15">Oatmeal with berries & flaxseed</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="15">Chicken Caesar wrap (light dressing)</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="15">Baked trout, roasted vegetables, brown rice</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>17</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="16">Veggie frittata</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="16">Black bean soup + side salad</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="16">Turkey meatloaf, cauliflower mash, green beans</span></td>
+                            </tr>
+                            <tr class="highlight">
+                                <td><strong>18</strong> ★ Canadian</td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="17">Steel-cut oats (maple, pecans)</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="17">Pea-and-chicken soup + whole-grain roll</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="17">Grilled salmon, asparagus, wild rice</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>19</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="18">Yogurt parfait with granola & fruit</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="18">Chicken shawarma bowl</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="18">Beef stew with root vegetables</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>20</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="19">Smoothie (berries, oats, peanut butter)</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="19">Tuna-quinoa salad</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="19">Chicken-and-veg stir-fry over brown rice</span></td>
+                            </tr>
+                            <tr class="highlight">
+                                <td><strong>21</strong> ★ Mongolian</td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="20">Scrambled eggs + scallions</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="20">Vegetarian Mongolian noodles (tsuivan)</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="20">Beef & broccoli stir-fry, brown rice</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="week4" class="meal-week">
+                <h3>Week 4</h3>
+                <div class="table-responsive">
+                    <table class="meal-table">
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Breakfast</th>
+                                <th>Lunch</th>
+                                <th>Dinner</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>22</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="21">Avocado toast + egg</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="21">Turkey-avocado wrap</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="21">Blackened salmon, quinoa salad</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>23</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="22">Beet-berry smoothie bowl</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="22">Vegetable minestrone soup</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="22">Chicken fajitas (peppers, onions)</span></td>
+                            </tr>
+                            <tr class="highlight">
+                                <td><strong>24</strong> ★ Turkish</td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="23">Turkish yogurt with honey & walnuts</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="23">Kofta kebabs + bulgur pilaf</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="23">Eggplant moussaka (no pork)</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>25</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="24">Oatmeal with fruit & nuts</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="24">Salmon sushi bowl</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="24">Moroccan chicken tagine with couscous</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>26</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="25">Spinach-banana-oat smoothie</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="25">Lentil-quinoa salad</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="25">Shrimp scampi with zucchini noodles</span></td>
+                            </tr>
+                            <tr class="highlight">
+                                <td><strong>27</strong> ★ Canadian</td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="26">Maple-yogurt parfait + granola</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="26">Wild rice & mushroom soup</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="26">Cedar-plank salmon, roasted root vegetables</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>28</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="27">Egg-white omelet with spinach & tomato</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="27">Turkey burger + side salad</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="27">Beef & vegetable kebabs</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="week5" class="meal-week">
+                <h3>Bonus Days (29-30)</h3>
+                <div class="table-responsive">
+                    <table class="meal-table">
+                        <thead>
+                            <tr>
+                                <th>Day</th>
+                                <th>Breakfast</th>
+                                <th>Lunch</th>
+                                <th>Dinner</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>29</strong></td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="28">Whole-grain pancakes with fruit</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="28">Chicken-avocado salad</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="28">Tofu vegetable curry with brown rice</span></td>
+                            </tr>
+                            <tr class="highlight">
+                                <td><strong>30</strong> ★ Mongolian</td>
+                                <td><span class="meal-link" data-meal="breakfast" data-day="29">Banana-protein smoothie</span></td>
+                                <td><span class="meal-link" data-meal="lunch" data-day="29">Halal Mongolian beef (striploin, ginger-garlic sauce)</span></td>
+                                <td><span class="meal-link" data-meal="dinner" data-day="29">Beef & bok choy stir-fry, quinoa</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="notes-section">
+            <h2>Important Notes</h2>
+            <div class="notes">
+                <ul>
+                    <li>Click any meal name for the full recipe and step-by-step checklist.</li>
+                    <li>Track your progress by clicking on calendar days to mark meals as complete.</li>
+                    <li>Adjust portion sizes to meet individual calorie targets</li>
+                    <li>Add 2-3 smoothies daily between meals (see Smoothies page)</li>
+                    <li>All meals are halal-compliant with no pork or alcohol</li>
+                    <li>★ indicates cultural specialty days</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- Recipe Detail Modal -->
+    <div id="recipe-modal" class="recipe-modal">
+        <div class="recipe-modal-content">
+            <span class="recipe-modal-close">&times;</span>
+            <div id="recipe-modal-content">
+                <h3 id="recipe-title"></h3>
+                <div class="recipe-details">
+                    <div class="ingredients-section">
+                        <h4>Ingredients</h4>
+                        <ul id="recipe-ingredients"></ul>
+                    </div>
+                    <div class="instructions-section">
+                        <h4>Instructions</h4>
+                        <ol id="recipe-instructions"></ol>
+                    </div>
+                </div>
+                <div class="recipe-actions">
+                    <button id="add-to-tracking" class="btn"><i class="fas fa-check-circle"></i> Mark as Complete</button>
+                    <button id="edit-recipe" class="btn btn-secondary"><i class="fas fa-edit"></i> Edit Recipe</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Access Panel -->
+    <div class="quick-access-panel">
+        <a href="tracking.html" class="quick-access-btn" title="Track Meals">
+            <i class="fas fa-check-square"></i>
+        </a>
+        <a href="recipe-management.html" class="quick-access-btn" title="Manage Recipes">
+            <i class="fas fa-book"></i>
+        </a>
+        <div class="quick-access-btn" id="today-btn" title="Go to Today">
+            <i class="fas fa-calendar-day"></i>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Meal Prep Tracker. Created for personal use.</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize variables
+            let currentView = 'weekly';
+            let selectedDate = new Date();
+            
+            // Initialize calendar
+            initWeeklyCalendar(selectedDate);
+            
+            // View switching
+            document.getElementById('view-weekly').addEventListener('click', function() {
+                document.getElementById('weekly-calendar').style.display = '';
+                document.getElementById('monthly-calendar').style.display = 'none';
+                document.getElementById('annual-calendar').style.display = 'none';
+                
+                document.getElementById('view-weekly').classList.add('active');
+                document.getElementById('view-monthly').classList.remove('active');
+                document.getElementById('view-annual').classList.remove('active');
+                
+                currentView = 'weekly';
+                initWeeklyCalendar(selectedDate);
+            });
+            
+            document.getElementById('view-monthly').addEventListener('click', function() {
+                document.getElementById('weekly-calendar').style.display = 'none';
+                document.getElementById('monthly-calendar').style.display = '';
+                document.getElementById('annual-calendar').style.display = 'none';
+                
+                document.getElementById('view-weekly').classList.remove('active');
+                document.getElementById('view-monthly').classList.add('active');
+                document.getElementById('view-annual').classList.remove('active');
+                
+                currentView = 'monthly';
+                initMonthlyCalendar(selectedDate);
+            });
+            
+            document.getElementById('view-annual').addEventListener('click', function() {
+                document.getElementById('weekly-calendar').style.display = 'none';
+                document.getElementById('monthly-calendar').style.display = 'none';
+                document.getElementById('annual-calendar').style.display = '';
+                
+                document.getElementById('view-weekly').classList.remove('active');
+                document.getElementById('view-monthly').classList.remove('active');
+                document.getElementById('view-annual').classList.add('active');
+                
+                currentView = 'annual';
+                initAnnualCalendar(selectedDate);
+            });
+            
+            // Calendar navigation
+            document.getElementById('prev-week').addEventListener('click', function() {
+                if (currentView === 'weekly') {
+                    selectedDate.setDate(selectedDate.getDate() - 7); // Go to previous week
+                    initWeeklyCalendar(selectedDate);
+                } else if (currentView === 'monthly') {
+                    selectedDate.setMonth(selectedDate.getMonth() - 1); // Go to previous month
+                    initMonthlyCalendar(selectedDate);
+                } else if (currentView === 'annual') {
+                    selectedDate.setFullYear(selectedDate.getFullYear() - 1); // Go to previous year
+                    initAnnualCalendar(selectedDate);
+                }
+            });
+            
+            document.getElementById('next-week').addEventListener('click', function() {
+                if (currentView === 'weekly') {
+                    selectedDate.setDate(selectedDate.getDate() + 7); // Go to next week
+                    initWeeklyCalendar(selectedDate);
+                } else if (currentView === 'monthly') {
+                    selectedDate.setMonth(selectedDate.getMonth() + 1); // Go to next month
+                    initMonthlyCalendar(selectedDate);
+                } else if (currentView === 'annual') {
+                    selectedDate.setFullYear(selectedDate.getFullYear() + 1); // Go to next year
+                    initAnnualCalendar(selectedDate);
+                }
+            });
+            
+            // Go to today button
+            document.getElementById('today-btn').addEventListener('click', function() {
+                selectedDate = new Date();
+                
+                if (currentView === 'weekly') {
+                    initWeeklyCalendar(selectedDate);
+                } else if (currentView === 'monthly') {
+                    initMonthlyCalendar(selectedDate);
+                } else {
+                    initAnnualCalendar(selectedDate);
+                }
+                
+                // Also focus on current date in table view
+                const today = new Date();
+                const day = today.getDate();
+                const hash = `#day-${day}`;
+                
+                // Find the day in the current tables
+                const dayElement = document.querySelector(hash);
+                if (dayElement) {
+                    dayElement.scrollIntoView({ behavior: 'smooth' });
+                    dayElement.classList.add('highlight');
+                    setTimeout(() => {
+                        dayElement.classList.remove('highlight');
+                    }, 3000);
+                }
+            });
+            
+            // Recipe modal
+            function openRecipeModal(mealType, dayIndex) {
+                const mealPlan = getMealForDate(new Date()); // Use function from script.js
+                const recipe = mealPlan[`${mealType}Recipe`];
+                
+                if (recipe) {
+                    // Populate modal
+                    document.getElementById('recipe-title').textContent = recipe.title;
+                    
+                    // Ingredients
+                    const ingredientsElement = document.getElementById('recipe-ingredients');
+                    ingredientsElement.innerHTML = '';
+                    recipe.ingredients.forEach(ingredient => {
+                        const li = document.createElement('li');
+                        li.textContent = ingredient;
+                        ingredientsElement.appendChild(li);
+                    });
+                    
+                    // Instructions
+                    const instructionsElement = document.getElementById('recipe-instructions');
+                    instructionsElement.innerHTML = '';
+                    recipe.instructions.forEach(instruction => {
+                        const li = document.createElement('li');
+                        li.textContent = instruction;
+                        instructionsElement.appendChild(li);
+                    });
+                    
+                    // Show modal
+                    document.getElementById('recipe-modal').style.display = 'block';
+                } else {
+                    alert('No detailed recipe available for this meal.');
+                }
+            }
+            
+            // Close modal
+            const closeModal = document.querySelector('.recipe-modal-close');
+            if (closeModal) {
+                closeModal.addEventListener('click', function() {
+                    document.getElementById('recipe-modal').style.display = 'none';
+                });
+            }
+            
+            // Mark recipe as complete
+            document.getElementById('add-to-tracking').addEventListener('click', function() {
+                // This would update tracking data for the selected meal
+                alert('Meal marked as complete in your tracking data!');
+                document.getElementById('recipe-modal').style.display = 'none';
+                
+                // Update calendar view
+                if (currentView === 'weekly') {
+                    initWeeklyCalendar(selectedDate);
+                } else if (currentView === 'monthly') {
+                    initMonthlyCalendar(selectedDate);
+                } else {
+                    initAnnualCalendar(selectedDate);
+                }
+            });
+            
+            // Edit recipe button
+            document.getElementById('edit-recipe').addEventListener('click', function() {
+                window.location.href = 'recipe-management.html';
+            });
+            
+            // Make openRecipeModal available globally
+            window.openRecipeModal = openRecipeModal;
+            
+            // Add event listeners for meal links to open the recipe modal
+            document.querySelectorAll('.meal-link').forEach(link => {
+                link.style.cursor = 'pointer';
+                link.onclick = function() {
+                    openRecipeModal(
+                        this.dataset.meal,
+                        parseInt(this.dataset.day)
+                    );
+                };
+            });
+        });
+    </script>
+</body>
+</html>

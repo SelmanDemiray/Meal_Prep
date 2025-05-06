@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aybike's Nutrition & Recovery | Meal Prep Tracker</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/enhanced-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <style>
+        /* Extra Aybike-focused styles */
+        .aybike-focus { border-left: 6px solid #e91e63; background: #fff0f6; margin-bottom: 2rem; border-radius: 10px; }
+        .aybike-focus h2, .aybike-focus h3 { color: #e91e63; }
+        .aybike-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(233,30,99,0.08); padding: 1.5rem; margin-bottom: 1.5rem; }
+        .aybike-section-title { color: #e91e63; margin-bottom: 1rem; }
+        .nutrient-tracker-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+        .nutrient-tracker-table th, .nutrient-tracker-table td { border: 1px solid #f8bbd0; padding: 0.5rem; text-align: center; }
+        .nutrient-tracker-table th { background: #fce4ec; color: #e91e63; }
+        .nutrient-tracker-table input[type="checkbox"] { transform: scale(1.2); }
+        .exercise-list { list-style: disc; margin-left: 2rem; }
+        .tracker-summary { margin-top: 2rem; }
+        .tracker-summary h4 { color: #e91e63; }
+        .tracker-summary canvas { background: #fff; border-radius: 10px; }
+        .exercise-link { color: #e91e63; cursor: pointer; text-decoration: underline; }
+        .exercise-link:hover { color: #ad1457; }
+        .exercise-modal {
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4); align-items: center; justify-content: center;
+        }
+        .exercise-modal.active { display: flex; }
+        .exercise-modal-content {
+            background: #fff; border-radius: 12px; padding: 2rem; max-width: 400px; width: 90vw;
+            box-shadow: 0 4px 24px rgba(233,30,99,0.15);
+            position: relative;
+            animation: popIn 0.2s;
+        }
+        @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .exercise-modal-close {
+            position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; color: #e91e63; cursor: pointer;
+        }
+        .exercise-modal-content img {
+            max-width: 100%; border-radius: 8px; margin: 1rem 0;
+        }
+        .friendly-message {
+            background: #fce4ec;
+            color: #ad1457;
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 1.15rem;
+            text-align: center;
+        }
+        .nutrient-tracker-table td.editable { background: #fff8fb; }
+        .nutrient-tracker-table td.editable input[type="checkbox"] { cursor: pointer; }
+        .nutrient-tracker-table td:not(.editable) input[type="checkbox"] { cursor: not-allowed; }
+        .nutrient-tracker-table tr.today-row { background: #f8bbd0; }
+        .nutrient-tracker-table tr.selected-row { background: #fce4ec; }
+        .nutrient-tracker-table tr:hover { background: #fce4ec; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Meal Prep Tracker</h1>
+        <div class="mobile-menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <div class="nav-left-group">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="smoothies.html">Smoothies</a></li>
+                    <li><a href="nutrition.html" class="active">Nutrition</a></li>
+                </div>
+                <div class="nav-right-group">
+                    <li><a href="meal-plan.html">Meal Plan</a></li>
+                    <li><a href="tracking.html">Track Meals</a></li>
+                    <li><a href="recipe-management.html">Recipes</a></li>
+                </div>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="page-content">
+        <section class="hero nutrition-hero">
+            <h2>Aybike's Postpartum Nutrition & Recovery</h2>
+            <p>Personalized nutrition, vitamin, and exercise plan for Aybike's healthy recovery and well-being.</p>
+        </section>
+
+        <div class="friendly-message">
+            <strong>Welcome Aybike!</strong> Track your daily nutrients and explore gentle exercises to help you feel your best. Remember, small steps every day add up to big results. 💖
+        </div>
+
+        <div class="dashboard-grid">
+            <section class="aybike-focus">
+                <div class="aybike-card">
+                    <h2 class="aybike-section-title"><i class="fas fa-female"></i> Aybike's Recovery Plan</h2>
+                    <p>
+                        This plan is tailored for Aybike's postpartum recovery, focusing on healing, energy, and supporting breastfeeding. 
+                        It emphasizes key nutrients, gentle home exercises, and daily tracking to ensure optimal health.
+                    </p>
+                </div>
+                <div class="aybike-card">
+                    <h3 class="aybike-section-title"><i class="fas fa-apple-alt"></i> Key Nutrients & Daily Needs</h3>
+                    <ul>
+                        <li><strong>Protein:</strong> 80–100g/day (tissue repair, milk production)</li>
+                        <li><strong>Iron:</strong> 18–27mg/day (replenish blood loss, energy)</li>
+                        <li><strong>Calcium:</strong> 1,000–1,300mg/day (bone health, lactation)</li>
+                        <li><strong>Vitamin D:</strong> 600–800 IU/day (bone, immune health)</li>
+                        <li><strong>Vitamin C:</strong> 120mg/day (healing, iron absorption)</li>
+                        <li><strong>Omega-3 (DHA):</strong> 200–300mg/day (brain, mood, baby development)</li>
+                        <li><strong>Folate:</strong> 500–600mcg/day (cell growth, healing)</li>
+                        <li><strong>Fluids:</strong> 2.5–3L/day (hydration, milk supply)</li>
+                    </ul>
+                </div>
+                <div class="aybike-card">
+                    <h3 class="aybike-section-title"><i class="fas fa-dumbbell"></i> Exercise Library <span style="font-size:0.9em;color:#888;">(Click any exercise for instructions)</span></h3>
+                    <ul class="exercise-list">
+                        <li><span class="exercise-link" data-ex="walking">Gentle Walking</span></li>
+                        <li><span class="exercise-link" data-ex="belly-breathing">Deep Belly Breathing</span></li>
+                        <li><span class="exercise-link" data-ex="ankle-circles">Ankle Circles</span></li>
+                        <li><span class="exercise-link" data-ex="shoulder-rolls">Shoulder Rolls</span></li>
+                        <li><span class="exercise-link" data-ex="pelvic-tilts">Pelvic Tilts</span></li>
+                        <li><span class="exercise-link" data-ex="seated-marches">Seated Marches</span></li>
+                        <li><span class="exercise-link" data-ex="wall-pushups">Wall Push-Ups</span></li>
+                        <li><span class="exercise-link" data-ex="glute-bridges">Glute Bridges</span></li>
+                        <li><span class="exercise-link" data-ex="bird-dog">Bird-Dog</span></li>
+                        <li><span class="exercise-link" data-ex="kegels">Kegel Exercises</span></li>
+                        <li><span class="exercise-link" data-ex="gentle-yoga">Gentle Yoga</span></li>
+                    </ul>
+                    <p style="font-size:0.95em;color:#888;">All exercises are safe for postpartum recovery and require minimal or no equipment. Always consult your doctor before starting or progressing exercises after childbirth.</p>
+                </div>
+            </section>
+
+            <section class="aybike-focus">
+                <div class="aybike-card">
+                    <h3 class="aybike-section-title"><i class="fas fa-clipboard-check"></i> Daily Nutrient & Vitamin Tracker</h3>
+                    <form id="aybike-nutrient-tracker">
+                        <table class="nutrient-tracker-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Protein</th>
+                                    <th>Iron</th>
+                                    <th>Calcium</th>
+                                    <th>Vitamin D</th>
+                                    <th>Vitamin C</th>
+                                    <th>Omega-3</th>
+                                    <th>Folate</th>
+                                    <th>Fluids</th>
+                                </tr>
+                            </thead>
+                            <tbody id="nutrient-tracker-body">
+                                <!-- JS will populate rows -->
+                            </tbody>
+                        </table>
+                        <button type="submit" class="btn">Save Changes</button>
+                    </form>
+                    <div class="tracker-summary">
+                        <h4>Progress Over Time</h4>
+                        <canvas id="nutrient-progress-chart" height="120"></canvas>
+                        <p style="font-size:0.95em;color:#888;">See your consistency and trends for each nutrient. Click any day to edit. Aim for all checkmarks daily!</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section class="nutrition-tips">
+            <h2>Smart Nutrition Strategies for Aybike</h2>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <div class="tip-icon"><i class="fas fa-clock"></i></div>
+                    <h3>Meal Timing</h3>
+                    <p>Eat small, frequent meals every 3-4 hours to maintain energy and support milk supply.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon"><i class="fas fa-tint"></i></div>
+                    <h3>Hydration</h3>
+                    <p>Drink a glass of water with every meal and snack. Keep a bottle nearby when breastfeeding.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon"><i class="fas fa-bed"></i></div>
+                    <h3>Rest & Recovery</h3>
+                    <p>Prioritize sleep and rest. Ask for help and listen to your body's needs.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon"><i class="fas fa-balance-scale"></i></div>
+                    <h3>Balanced Plates</h3>
+                    <p>Include protein, whole grains, healthy fats, and colorful fruits/veggies at every meal.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Meal Prep Tracker. Created for personal use.</p>
+    </footer>
+
+    <!-- Exercise Modal -->
+    <div id="exercise-modal" class="exercise-modal">
+        <div class="exercise-modal-content">
+            <span class="exercise-modal-close" id="exercise-modal-close">&times;</span>
+            <h3 id="exercise-modal-title"></h3>
+            <img id="exercise-modal-img" src="" alt="" style="display:none;">
+            <div id="exercise-modal-desc"></div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+    <script>
+        // --- Aybike's Daily Nutrient Tracker Logic ---
+        const trackerKey = 'aybikeNutrientTracker';
+        const nutrients = ['Protein','Iron','Calcium','Vitamin D','Vitamin C','Omega-3','Folate','Fluids'];
+        const trackerBody = document.getElementById('nutrient-tracker-body');
+        const today = new Date();
+        const todayStr = today.toISOString().slice(0,10);
+
+        // Load tracker data
+        function loadTrackerData() {
+            let data = localStorage.getItem(trackerKey);
+            if (!data) return [];
+            try { return JSON.parse(data); } catch { return []; }
+        }
+        // Save tracker data
+        function saveTrackerData(data) {
+            localStorage.setItem(trackerKey, JSON.stringify(data));
+        }
+        // Render tracker table (editable for any day)
+        let selectedDate = todayStr;
+        function renderTrackerTable() {
+            const data = loadTrackerData();
+            trackerBody.innerHTML = '';
+            // Show up to 14 days, most recent first
+            const days = [];
+            for (let i = 0; i < 14; i++) {
+                const d = new Date();
+                d.setDate(today.getDate() - i);
+                days.push(d.toISOString().slice(0,10));
+            }
+            days.forEach(dateStr => {
+                const rowData = data.find(row => row.date === dateStr) || {date: dateStr};
+                trackerBody.innerHTML += `
+                    <tr class="${dateStr === todayStr ? 'today-row' : ''} ${dateStr === selectedDate ? 'selected-row' : ''}" data-date="${dateStr}">
+                        <td>${dateStr === todayStr ? '<strong>Today</strong>' : dateStr}</td>
+                        ${nutrients.map(nutr => `
+                            <td class="editable">
+                                <input type="checkbox" name="${nutr}" data-date="${dateStr}" ${rowData[nutr] ? 'checked' : ''} ${dateStr === selectedDate ? '' : 'disabled'}>
+                            </td>
+                        `).join('')}
+                    </tr>
+                `;
+            });
+        }
+        // Allow clicking any row to edit that day
+        trackerBody.addEventListener('click', function(e) {
+            let tr = e.target.closest('tr[data-date]');
+            if (tr) {
+                selectedDate = tr.getAttribute('data-date');
+                renderTrackerTable();
+                renderTrackerChart();
+            }
+        });
+        // Handle form submit (save for selected day)
+        document.getElementById('aybike-nutrient-tracker').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let data = loadTrackerData();
+            // Remove selected day's entry if exists
+            data = data.filter(row => row.date !== selectedDate);
+            // Gather selected day's values
+            const row = {date: selectedDate};
+            nutrients.forEach(nutr => {
+                row[nutr] = document.querySelector(`input[name="${nutr}"][data-date="${selectedDate}"]`).checked;
+            });
+            data.unshift(row);
+            // Keep only 14 days
+            if (data.length > 14) data = data.slice(0,14);
+            saveTrackerData(data);
+            renderTrackerTable();
+            renderTrackerChart();
+        });
+        // Update chart
+        function renderTrackerChart() {
+            const data = loadTrackerData();
+            const labels = data.map(row => row.date).reverse();
+            const datasets = nutrients.map((nutr, idx) => ({
+                label: nutr,
+                data: data.map(row => row[nutr] ? 1 : 0).reverse(),
+                backgroundColor: `hsla(${idx*40+320},70%,70%,0.7)`,
+                borderColor: `hsla(${idx*40+320},70%,50%,1)`,
+                borderWidth: 2,
+                type: 'bar',
+                stack: 'nutrients'
+            }));
+            if (window.nutrientChart) window.nutrientChart.destroy();
+            window.nutrientChart = new Chart(document.getElementById('nutrient-progress-chart').getContext('2d'), {
+                type: 'bar',
+                data: { labels, datasets },
+                options: {
+                    plugins: { legend: { display: true } },
+                    responsive: true,
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, min: 0, max: nutrients.length, ticks: { stepSize: 1 } }
+                    }
+                }
+            });
+        }
+        renderTrackerTable();
+        renderTrackerChart();
+
+        // --- Exercise Modal Logic ---
+        const exerciseData = {
+            "walking": {
+                title: "Gentle Walking",
+                desc: "Walk at a comfortable pace for 5–20 minutes. Focus on posture and breathing. Great for circulation and mood.",
+                img: "https://cdn.pixabay.com/photo/2017/01/20/00/30/walking-1996537_1280.png"
+            },
+            "belly-breathing": {
+                title: "Deep Belly Breathing",
+                desc: "Sit or lie down. Place one hand on your belly. Inhale deeply through your nose, letting your belly rise. Exhale slowly. Repeat for 5–10 breaths.",
+                img: "https://cdn.pixabay.com/photo/2016/03/31/19/14/yoga-1296747_1280.png"
+            },
+            "ankle-circles": {
+                title: "Ankle Circles",
+                desc: "Sit comfortably. Lift one foot and rotate your ankle in circles, 10 times each direction. Switch feet.",
+                img: "https://cdn.pixabay.com/photo/2014/04/03/10/32/foot-312142_1280.png"
+            },
+            "shoulder-rolls": {
+                title: "Shoulder Rolls",
+                desc: "Sit or stand tall. Roll your shoulders up, back, and down in a circle. Repeat 10 times, then reverse direction.",
+                img: "https://cdn.pixabay.com/photo/2016/03/31/19/14/yoga-1296747_1280.png"
+            },
+            "pelvic-tilts": {
+                title: "Pelvic Tilts",
+                desc: "Lie on your back with knees bent. Gently flatten your lower back against the floor by tightening your stomach. Hold 3 seconds, relax. Repeat 10–15 times.",
+                img: "https://cdn.pixabay.com/photo/2016/03/31/19/14/yoga-1296747_1280.png"
+            },
+            "seated-marches": {
+                title: "Seated Marches",
+                desc: "Sit upright. Lift one knee, then the other, as if marching. Continue for 30–60 seconds.",
+                img: "https://cdn.pixabay.com/photo/2017/01/20/00/30/walking-1996537_1280.png"
+            },
+            "wall-pushups": {
+                title: "Wall Push-Ups",
+                desc: "Stand facing a wall, arms outstretched. Place hands on wall, lower chest toward wall, then push back. Repeat 10–15 times.",
+                img: "https://cdn.pixabay.com/photo/2016/03/31/19/14/yoga-1296747_1280.png"
+            },
+            "glute-bridges": {
+                title: "Glute Bridges",
+                desc: "Lie on your back, knees bent, feet flat. Lift hips up, squeeze glutes, hold 2 seconds, lower down. Repeat 10–15 times.",
+                img: "https://cdn.pixabay.com/photo/2016/03/31/19/14/yoga-1296747_1280.png"
+            },
+            "bird-dog": {
+                title: "Bird-Dog",
+                desc: "On hands and knees, extend one arm and opposite leg. Hold 2 seconds, switch sides. Repeat 10 times each side.",
+                img: "https://cdn.pixabay.com/photo/2016/03/31/19/14/yoga-1296747_1280.png"
+            },
+            "kegels": {
+                title: "Kegel Exercises",
+                desc: "Tighten pelvic floor muscles (as if stopping urine flow). Hold 3–5 seconds, relax. Repeat 10–15 times, several times a day.",
+                img: "https://cdn.pixabay.com/photo/2016/03/31/19/14/yoga-1296747_1280.png"
+            },
+            "gentle-yoga": {
+                title: "Gentle Yoga",
+                desc: "Try simple poses like Cat-Cow, Child's Pose, or seated stretches. Move slowly and breathe deeply.",
+                img: "https://cdn.pixabay.com/photo/2016/03/31/19/14/yoga-1296747_1280.png"
+            }
+        };
+        document.querySelectorAll('.exercise-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const ex = exerciseData[this.dataset.ex];
+                if (!ex) return;
+                document.getElementById('exercise-modal-title').textContent = ex.title;
+                document.getElementById('exercise-modal-desc').textContent = ex.desc;
+                const img = document.getElementById('exercise-modal-img');
+                if (ex.img) {
+                    img.src = ex.img;
+                    img.style.display = '';
+                } else {
+                    img.style.display = 'none';
+                }
+                document.getElementById('exercise-modal').classList.add('active');
+            });
+        });
+        document.getElementById('exercise-modal-close').onclick = function() {
+            document.getElementById('exercise-modal').classList.remove('active');
+        };
+        document.getElementById('exercise-modal').onclick = function(e) {
+            if (e.target === this) this.classList.remove('active');
+        };
+    </script>
+</body>
+</html>
