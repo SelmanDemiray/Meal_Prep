@@ -790,6 +790,27 @@ textarea {
     margin-right: 0.5em;
 }
 
+/* Suggestion Box Styles */
+.suggestion-list {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ddd;
+    width: calc(100% - 2px);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    list-style: none;
+    margin-top: 0.2rem;
+    padding: 0;
+}
+.suggestion-list li {
+    padding: 0.5rem;
+    cursor: pointer;
+}
+.suggestion-list li:hover {
+    background: #f0f0f0;
+}
+
 /* Footer */
 footer {
     background: var(--dark-color);

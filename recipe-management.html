@@ -41,26 +41,15 @@
             <div class="meal-plan-calendar mb-3">
                 <div class="calendar-header">
                     <div class="calendar-navigation">
-                        <button id="prev-week" class="calendar-nav-btn"><i class="fas fa-chevron-left"></i></button>
-                        <h3 id="calendar-title">May 6 - May 12, 2023</h3>
-                        <button id="next-week" class="calendar-nav-btn"><i class="fas fa-chevron-right"></i></button>
+                        <button id="prev-month" class="calendar-nav-btn"><i class="fas fa-chevron-left"></i></button>
+                        <h3 id="calendar-title">Loading…</h3>
+                        <button id="next-month" class="calendar-nav-btn"><i class="fas fa-chevron-right"></i></button>
                     </div>
                 </div>
-                <div id="mini-calendar" class="calendar-view">
-                    <div class="calendar-weekdays">
-                        <div class="calendar-weekday">Sun</div>
-                        <div class="calendar-weekday">Mon</div>
-                        <div class="calendar-weekday">Tue</div>
-                        <div class="calendar-weekday">Wed</div>
-                        <div class="calendar-weekday">Thu</div>
-                        <div class="calendar-weekday">Fri</div>
-                        <div class="calendar-weekday">Sat</div>
-                    </div>
-                    <div class="calendar-grid" id="mini-calendar-grid">
-                        <!-- JS will populate calendar days -->
-                    </div>
+                <div class="calendar-grid" id="recipe-calendar-grid">
+                    <!-- will be populated by JS as a month view -->
                 </div>
-                <p class="text-center mt-3">Click on any day to view and edit recipes for that date</p>
+                <p class="text-center mt-3">Click any day to edit recipes for that date</p>
             </div>
         </div>
 
@@ -77,30 +66,11 @@
 
             <div class="recipe-form-section">
                 <h3>Edit Recipe</h3>
-                
-                <div class="day-meal-selector">
-                    <div class="form-group">
-                        <label for="manage-day-selector">Day:</label>
-                        <select id="manage-day-selector" class="form-control"></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="manage-meal-selector">Meal:</label>
-                        <select id="manage-meal-selector" class="form-control">
-                            <option value="breakfast">Breakfast</option>
-                            <option value="lunch">Lunch</option>
-                            <option value="dinner">Dinner</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button id="search-recipe-btn" class="btn"><i class="fas fa-search"></i> Search TheMealDB</button>
-                    </div>
-                </div>
-
                 <form id="recipe-form">
                     <div class="form-group">
                         <label for="recipe-title">Recipe Title:</label>
-                        <input type="text" id="recipe-title" class="form-control" placeholder="Enter recipe title">
+                        <input type="text" id="recipe-title" class="form-control" placeholder="Start typing to search…">
+                        <ul id="recipe-suggestions" class="suggestion-list"></ul>
                     </div>
                     
                     <div class="form-group">
@@ -183,23 +153,22 @@
     <script src="js/script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize the mini calendar
-            const miniCalendarGrid = document.getElementById('mini-calendar-grid');
-            if (miniCalendarGrid) {
-                // Create a simplified weekly calendar
+            // Initialize the recipe calendar
+            const recipeCalendarGrid = document.getElementById('recipe-calendar-grid');
+            if (recipeCalendarGrid) {
+                // Create a monthly calendar view
                 const today = new Date();
-                const startOfWeek = new Date(today);
-                startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+                const currentMonth = today.getMonth();
+                const currentYear = today.getFullYear();
                 
                 // Update calendar title
                 document.getElementById('calendar-title').textContent = 
-                    `${startOfWeek.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})} - 
-                     ${new Date(startOfWeek.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}`;
+                    `${today.toLocaleDateString('en-US', {month: 'long', year: 'numeric'})}`;
                 
-                // Create 7 days (Sunday to Saturday)
-                for (let i = 0; i < 7; i++) {
-                    const dayDate = new Date(startOfWeek);
-                    dayDate.setDate(startOfWeek.getDate() + i);
+                // Populate calendar days
+                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const dayDate = new Date(currentYear, currentMonth, i);
                     
                     const dayElement = document.createElement('div');
                     dayElement.className = 'calendar-day';
@@ -225,7 +194,7 @@
                         }
                     });
                     
-                    miniCalendarGrid.appendChild(dayElement);
+                    recipeCalendarGrid.appendChild(dayElement);
                 }
             }
             
@@ -237,14 +206,14 @@
             }
             
             // Calendar navigation
-            document.getElementById('prev-week').addEventListener('click', function() {
-                // Implement previous week navigation
-                alert('Previous week navigation will be implemented');
+            document.getElementById('prev-month').addEventListener('click', function() {
+                // Implement previous month navigation
+                alert('Previous month navigation will be implemented');
             });
             
-            document.getElementById('next-week').addEventListener('click', function() {
-                // Implement next week navigation
-                alert('Next week navigation will be implemented');
+            document.getElementById('next-month').addEventListener('click', function() {
+                // Implement next month navigation
+                alert('Next month navigation will be implemented');
             });
             
             // Today button in quick access panel

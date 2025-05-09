@@ -1396,5 +1396,116 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // ... rest of existing code ...
+    // --- NEW: Spoonacular API + cache ---
+    const SPOON_API_KEY = '10db2333d8ff4fc18cda19739a6e3e43';
+    const SPOON_CACHE = 'spoonacularCache';
+
+    function getCached(query) {
+        const cache = JSON.parse(localStorage.getItem(SPOON_CACHE) || '{}');
+        return cache[query];
+    }
+    function setCached(query, data) {
+        const cache = JSON.parse(localStorage.getItem(SPOON_CACHE) || '{}');
+        cache[query] = data;
+        localStorage.setItem(SPOON_CACHE, JSON.stringify(cache));
+    }
+    async function fetchSpoon(query) {
+        if (!query) return [];
+        const hit = getCached(query);
+        if (hit) return hit;
+        const res = await fetch(`https://api.spoonacular.com/recipes/complexSearch?apiKey=${SPOON_API_KEY}&query=${encodeURIComponent(query)}&number=5`);
+        const json = await res.json();
+        const results = (json.results || []).map(r => r.title);
+        setCached(query, results);
+        return results;
+    }
+
+    // --- NEW: autocomplete on Recipe Title ---
+    function setupRecipeAutocomplete() {
+        const inp = document.getElementById('recipe-title');
+        const list = document.getElementById('recipe-suggestions');
+        if (!inp || !list) return;
+        let timer;
+        inp.addEventListener('input', _ => {
+            clearTimeout(timer);
+            timer = setTimeout(async () => {
+                const q = inp.value.trim();
+                list.innerHTML = '';
+                if (q.length < 2) return;
+                const arr = await fetchSpoon(q);
+                arr.forEach(title => {
+                    const li = document.createElement('li');
+                    li.textContent = title;
+                    li.onclick = _ => {
+                        inp.value = title;
+                        list.innerHTML = '';
+                    };
+                    list.appendChild(li);
+                });
+            }, 300);
+        });
+        document.addEventListener('click', e => {
+            if (!inp.contains(e.target)) list.innerHTML = '';
+        });
+    }
+
+    // --- NEW: monthly calendar for recipe-management ---
+    function initRecipeCalendar(date) {
+        const grid = document.getElementById('recipe-calendar-grid');
+        const title = document.getElementById('calendar-title');
+        if (!grid || !title) return;
+        const year = date.getFullYear(), month = date.getMonth();
+        const first = new Date(year, month, 1), last = new Date(year, month + 1, 0);
+        title.textContent = first.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        grid.innerHTML = '';
+        // weekday headers
+        ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(d => {
+            const hd = document.createElement('div');
+            hd.className = 'calendar-weekday';
+            hd.textContent = d;
+            grid.appendChild(hd);
+        });
+        // padding
+        for (let i = 0; i < first.getDay(); i++) {
+            const e = document.createElement('div'); e.className = 'calendar-day inactive'; grid.appendChild(e);
+        }
+        // days
+        for (let d = 1; d <= last.getDate(); d++) {
+            const cell = document.createElement('div');
+            cell.className = 'calendar-day';
+            cell.textContent = d;
+            if (new Date(year, month, d).toDateString() === new Date().toDateString()) cell.classList.add('today');
+            cell.onclick = _ => {
+                const daySel = document.getElementById('manage-day-selector');
+                if (daySel) {
+                    daySel.value = d;
+                    daySel.dispatchEvent(new Event('change'));
+                }
+            };
+            grid.appendChild(cell);
+        }
+    }
+
+    // wire prev/next month
+    function wireRecipeCalendarNav() {
+        let cur = new Date();
+        document.getElementById('prev-month').onclick = _ => {
+            cur.setMonth(cur.getMonth() - 1);
+            initRecipeCalendar(cur);
+        };
+        document.getElementById('next-month').onclick = _ => {
+            cur.setMonth(cur.getMonth() + 1);
+            initRecipeCalendar(cur);
+        };
+    }
+
+    // --- hook into existing init for recipe-manager ---
+    if (document.getElementById('recipe-management')) {
+        document.addEventListener('DOMContentLoaded', () => {
+            // ...existing initializeRecipeManager code...
+            setupRecipeAutocomplete();
+            initRecipeCalendar(new Date());
+            wireRecipeCalendarNav();
+        }, { once: true });
+    }
 });
