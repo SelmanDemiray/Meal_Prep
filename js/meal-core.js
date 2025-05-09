@@ -1,49 +1,7 @@
+// Core functionality for meal plans, tracking, and data management
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Tab functionality for meal plans
-    const showWeek = (weekNum) => {
-        document.querySelectorAll('.meal-week').forEach(week => {
-            week.classList.remove('active');
-        });
-        document.querySelectorAll('.tab-btn').forEach(tab => {
-            tab.classList.remove('active');
-        });
-        
-        document.getElementById(`week${weekNum}`).classList.add('active');
-        document.querySelectorAll('.tab-btn')[weekNum-1].classList.add('active');
-    };
-    
-    // Make showWeek available globally
-    window.showWeek = showWeek;
-    
-    // Handle water glass tracking
-    const selmanGlasses = document.querySelectorAll('.selman-glass');
-    const aybikeGlasses = document.querySelectorAll('.aybike-glass');
-    if (selmanGlasses.length > 0) {
-        selmanGlasses.forEach(glass => {
-            glass.addEventListener('click', () => {
-                const idx = parseInt(glass.dataset.glass, 10) - 1;
-                selmanGlasses.forEach((g, i) => {
-                    if (i <= idx) g.classList.add('filled');
-                    else g.classList.remove('filled');
-                });
-                updateCompletionRate();
-            });
-        });
-    }
-    if (aybikeGlasses.length > 0) {
-        aybikeGlasses.forEach(glass => {
-            glass.addEventListener('click', () => {
-                const idx = parseInt(glass.dataset.glass, 10) - 1;
-                aybikeGlasses.forEach((g, i) => {
-                    if (i <= idx) g.classList.add('filled');
-                    else g.classList.remove('filled');
-                });
-                updateCompletionRate();
-            });
-        });
-    }
-    
-    // --- NEW RECIPE CYCLE MANAGEMENT SYSTEM ---
+    // --- RECIPE CYCLE MANAGEMENT SYSTEM ---
     const CYCLE_LENGTH = 30; // Days per cycle
     
     // Get all meal cycles from localStorage or initialize with empty
@@ -284,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Call initialization
     initializeWithSampleData();
     
-    // --- NEW CALENDAR & TRACKING INTEGRATION ---
+    // --- CALENDAR & TRACKING INTEGRATION ---
     
     // Initialize weekly calendar
     function initWeeklyCalendar(date) {
@@ -661,34 +619,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert(`${mealType.charAt(0).toUpperCase() + mealType.slice(1)}: ${mealContent}\nNo detailed recipe available.`);
         }
     }
-    
-    // Make functions available globally
-    window.initWeeklyCalendar = initWeeklyCalendar;
-    window.initMonthlyCalendar = initMonthlyCalendar;
-    window.initAnnualCalendar = initAnnualCalendar;
-    window.getMealPlanAndTrackingForDate = getMealPlanAndTrackingForDate;
-    window.formatDateISO = formatDateISO;
-    window.openMealDetails = openMealDetails;
-    
-    // Initialize calendar if elements exist
-    if (document.getElementById('week-calendar-grid')) {
-        initWeeklyCalendar(new Date());
-    }
-    
-    // Check for tracking page loading with a date parameter - prevent auto-scrolling
-    if (window.location.pathname.includes('tracking.html')) {
-        const selectedDateStr = sessionStorage.getItem('selectedDate');
-        if (selectedDateStr) {
-            const selectedDate = new Date(selectedDateStr);
-            if (!isNaN(selectedDate.getTime())) {
-                setTimeout(() => {
-                    window.navigateToDate && window.navigateToDate(selectedDate);
-                    sessionStorage.removeItem('selectedDate'); // Clear after use
-                }, 500);
-            }
-        }
-    }
-    
+
     // --- THEMEALDB API INTEGRATION ---
     const MEALDB_API_BASE = 'https://www.themealdb.com/api/json/v1/1';
     
@@ -870,533 +801,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Make functions available globally for use elsewhere
-    window.mealDbService = mealDbService;
-    window.importMealsForCycle = importMealsForCycle;
-    window.convertMealDbToRecipe = convertMealDbToRecipe;
-    
-    // --- INITIALIZE RECIPE MANAGEMENT PAGE ---
-    if (document.getElementById('recipe-management')) {
-        initializeRecipeManager();
-    }
-    
-    function initializeRecipeManager() {
-        const cycleSelector = document.getElementById('manage-cycle-selector');
-        const newCycleBtn = document.getElementById('new-cycle-btn');
-        const daySelector = document.getElementById('manage-day-selector');
-        const mealSelector = document.getElementById('manage-meal-selector');
-        const recipeForm = document.getElementById('recipe-form');
-        const cycleNameDisplay = document.getElementById('cycle-name-display');
-        const searchRecipeBtn = document.getElementById('search-recipe-btn');
-        const importCycleBtn = document.getElementById('import-cycle-btn');
-        
-        // Populate cycle selector
-        function populateCycleSelector() {
-            cycleSelector.innerHTML = '';
-            const cycles = getActiveMealCycles();
-            
-            cycles.forEach(cycleId => {
-                const option = document.createElement('option');
-                option.value = cycleId;
-                option.textContent = generateCycleLabel(cycleId);
-                cycleSelector.appendChild(option);
-            });
-            
-            if (cycles.length > 0) {
-                cycleSelector.value = cycles[0];
-                updateCycleDisplay();
-                populateDaySelector();
-            }
-        }
-        
-        // ... existing code for populateDaySelector ...
-        
-        // Handle new cycle creation with MealDB option
-        newCycleBtn.addEventListener('click', function() {
-            const today = new Date();
-            const year = parseInt(prompt("Enter year for new cycle:", today.getFullYear()));
-            if (!year || isNaN(year)) return;
-            
-            const cycles = getMealCycles();
-            const existingCycles = Object.keys(cycles)
-                .filter(id => id.startsWith(`${year}-`))
-                .map(id => parseInt(id.split('-')[1]));
-            
-            let nextCycleNum = 1;
-            if (existingCycles.length > 0) {
-                nextCycleNum = Math.max(...existingCycles) + 1;
-            }
-            
-            const newCycleId = `${year}-${nextCycleNum.toString().padStart(2, '0')}`;
-            
-            // Ask if user wants to import from MealDB
-            if (confirm("Would you like to import recipes from TheMealDB for this cycle?")) {
-                // Show import options modal
-                showImportOptionsModal(newCycleId);
-            } else {
-                // Create empty cycle as before
-                const newCycle = {};
-                for (let i = 0; i < CYCLE_LENGTH; i++) {
-                    newCycle[i] = {
-                        breakfast: `Breakfast for Day ${i+1}`,
-                        lunch: `Lunch for Day ${i+1}`,
-                        dinner: `Dinner for Day ${i+1}`,
-                        breakfastRecipe: {
-                            title: `Breakfast Recipe for Day ${i+1}`,
-                            ingredients: ["Add ingredients here"],
-                            instructions: ["Add instructions here"]
-                        },
-                        lunchRecipe: {
-                            title: `Lunch Recipe for Day ${i+1}`,
-                            ingredients: ["Add ingredients here"],
-                            instructions: ["Add instructions here"]
-                        },
-                        dinnerRecipe: {
-                            title: `Dinner Recipe for Day ${i+1}`,
-                            ingredients: ["Add ingredients here"],
-                            instructions: ["Add instructions here"]
-                        }
-                    };
-                }
-                
-                saveRecipeCycle(newCycleId, newCycle);
-                alert(`Created new cycle: ${generateCycleLabel(newCycleId)}`);
-                populateCycleSelector();
-                cycleSelector.value = newCycleId;
-                updateCycleDisplay();
-                populateDaySelector();
-            }
-        });
-        
-        // Show import options modal for TheMealDB
-        function showImportOptionsModal(cycleId) {
-            // Create modal if it doesn't exist
-            if (!document.getElementById('import-modal')) {
-                const modal = document.createElement('div');
-                modal.id = 'import-modal';
-                modal.style.display = 'none';
-                modal.innerHTML = `
-                    <div class="modal-overlay"></div>
-                    <div class="modal-content">
-                        <span class="modal-close">&times;</span>
-                        <h2>Import Recipes from TheMealDB</h2>
-                        <div class="import-options">
-                            <div class="form-group">
-                                <label for="import-type">Import by:</label>
-                                <select id="import-type" class="form-control">
-                                    <option value="random">Random Selection</option>
-                                    <option value="category">Category</option>
-                                    <option value="ingredient">Main Ingredient</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group" id="category-group" style="display:none;">
-                                <label for="category-select">Select Category:</label>
-                                <select id="category-select" class="form-control">
-                                    <option value="">Loading categories...</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group" id="ingredient-group" style="display:none;">
-                                <label for="ingredient-select">Select Main Ingredient:</label>
-                                <select id="ingredient-select" class="form-control">
-                                    <option value="">Loading ingredients...</option>
-                                </select>
-                            </div>
-                            
-                            <p class="info-text">
-                                This will import up to 30 recipes from TheMealDB to fill your cycle.
-                                Recipes will be distributed across breakfast, lunch and dinner.
-                            </p>
-                            
-                            <div class="modal-actions">
-                                <button id="start-import-btn" class="btn">Start Import</button>
-                                <button id="cancel-import-btn" class="btn btn-secondary">Cancel</button>
-                            </div>
-                        </div>
-                        
-                        <div class="import-progress" style="display:none;">
-                            <p>Importing recipes... <span id="import-progress">0%</span></p>
-                            <div class="progress-bar">
-                                <div id="import-progress-fill" class="progress-fill" style="width:0%"></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-                
-                // Close modal on overlay or close button
-                modal.querySelector('.modal-overlay').onclick = () => modal.style.display = 'none';
-                modal.querySelector('.modal-close').onclick = () => modal.style.display = 'none';
-                modal.querySelector('#cancel-import-btn').onclick = () => modal.style.display = 'none';
-                
-                // Handle import type change
-                const importType = modal.querySelector('#import-type');
-                importType.addEventListener('change', function() {
-                    modal.querySelector('#category-group').style.display = this.value === 'category' ? 'block' : 'none';
-                    modal.querySelector('#ingredient-group').style.display = this.value === 'ingredient' ? 'block' : 'none';
-                    
-                    if (this.value === 'category' && !modal.querySelector('#category-select').dataset.loaded) {
-                        loadCategories();
-                    }
-                    
-                    if (this.value === 'ingredient' && !modal.querySelector('#ingredient-select').dataset.loaded) {
-                        loadIngredients();
-                    }
-                });
-                
-                // Load categories from TheMealDB
-                async function loadCategories() {
-                    try {
-                        const categorySelect = modal.querySelector('#category-select');
-                        categorySelect.innerHTML = '<option value="">Loading categories...</option>';
-                        
-                        const response = await mealDbService.getCategories();
-                        if (response.categories) {
-                            categorySelect.innerHTML = '<option value="">Select a category...</option>';
-                            response.categories.forEach(category => {
-                                const option = document.createElement('option');
-                                option.value = category.strCategory;
-                                option.textContent = category.strCategory;
-                                categorySelect.appendChild(option);
-                            });
-                            categorySelect.dataset.loaded = 'true';
-                        }
-                    } catch (error) {
-                        console.error('Error loading categories:', error);
-                        modal.querySelector('#category-select').innerHTML = '<option value="">Error loading categories</option>';
-                    }
-                }
-                
-                // Load ingredients from TheMealDB
-                async function loadIngredients() {
-                    try {
-                        const ingredientSelect = modal.querySelector('#ingredient-select');
-                        ingredientSelect.innerHTML = '<option value="">Loading ingredients...</option>';
-                        
-                        const response = await mealDbService.getIngredients();
-                        if (response.meals) {
-                            ingredientSelect.innerHTML = '<option value="">Select an ingredient...</option>';
-                            response.meals.forEach(ingredient => {
-                                const option = document.createElement('option');
-                                option.value = ingredient.strIngredient;
-                                option.textContent = ingredient.strIngredient;
-                                ingredientSelect.appendChild(option);
-                            });
-                            ingredientSelect.dataset.loaded = 'true';
-                        }
-                    } catch (error) {
-                        console.error('Error loading ingredients:', error);
-                        modal.querySelector('#ingredient-select').innerHTML = '<option value="">Error loading ingredients</option>';
-                    }
-                }
-                
-                // Start import process
-                modal.querySelector('#start-import-btn').addEventListener('click', async function() {
-                    const importType = modal.querySelector('#import-type').value;
-                    const filters = {};
-                    
-                    if (importType === 'category') {
-                        const category = modal.querySelector('#category-select').value;
-                        if (!category) {
-                            alert('Please select a category');
-                            return;
-                        }
-                        filters.category = category;
-                    } else if (importType === 'ingredient') {
-                        const ingredient = modal.querySelector('#ingredient-select').value;
-                        if (!ingredient) {
-                            alert('Please select an ingredient');
-                            return;
-                        }
-                        filters.ingredient = ingredient;
-                    }
-                    
-                    // Show progress UI
-                    modal.querySelector('.import-options').style.display = 'none';
-                    modal.querySelector('.import-progress').style.display = 'block';
-                    
-                    // Start import
-                    try {
-                        for (let i = 0; i <= 100; i += 10) {
-                            modal.querySelector('#import-progress').textContent = i + '%';
-                            modal.querySelector('#import-progress-fill').style.width = i + '%';
-                            await new Promise(resolve => setTimeout(resolve, 200));
-                        }
-                        
-                        const success = await importMealsForCycle(cycleId, filters);
-                        modal.style.display = 'none';
-                        
-                        if (success) {
-                            alert(`Created new cycle: ${generateCycleLabel(cycleId)} with recipes from TheMealDB`);
-                            populateCycleSelector();
-                            cycleSelector.value = cycleId;
-                            updateCycleDisplay();
-                            populateDaySelector();
-                        } else {
-                            alert('Error importing recipes. Please try again.');
-                        }
-                    } catch (error) {
-                        console.error('Import error:', error);
-                        alert('Error importing recipes. Please try again.');
-                        modal.style.display = 'none';
-                    }
-                });
-            }
-            
-            // Show the modal
-            document.getElementById('import-modal').style.display = 'block';
-        }
-        
-        // Add recipe search functionality
-        if (searchRecipeBtn) {
-            searchRecipeBtn.addEventListener('click', function() {
-                showRecipeSearchModal();
-            });
-        }
-        
-        // Show recipe search modal
-        function showRecipeSearchModal() {
-            // Create modal if it doesn't exist
-            if (!document.getElementById('recipe-search-modal')) {
-                const modal = document.createElement('div');
-                modal.id = 'recipe-search-modal';
-                modal.style.display = 'none';
-                modal.innerHTML = `
-                    <div class="modal-overlay"></div>
-                    <div class="modal-content">
-                        <span class="modal-close">&times;</span>
-                        <h2>Search Recipes</h2>
-                        <div class="search-form">
-                            <div class="form-group">
-                                <label for="recipe-search-input">Search by name:</label>
-                                <div class="search-input-group">
-                                    <input type="text" id="recipe-search-input" class="form-control" placeholder="Enter recipe name...">
-                                    <button id="recipe-search-btn" class="btn">Search</button>
-                                </div>
-                            </div>
-                            
-                            <div class="search-options">
-                                <button id="random-recipe-btn" class="btn btn-secondary">Get Random Recipe</button>
-                            </div>
-                        </div>
-                        
-                        <div id="search-results" class="search-results">
-                            <p>Search for recipes to import.</p>
-                        </div>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-                
-                // Close modal on overlay or close button
-                modal.querySelector('.modal-overlay').onclick = () => modal.style.display = 'none';
-                modal.querySelector('.modal-close').onclick = () => modal.style.display = 'none';
-                
-                // Handle search
-                modal.querySelector('#recipe-search-btn').addEventListener('click', async function() {
-                    const searchTerm = modal.querySelector('#recipe-search-input').value.trim();
-                    if (!searchTerm) return;
-                    
-                    try {
-                        modal.querySelector('#search-results').innerHTML = '<p>Searching...</p>';
-                        const response = await mealDbService.searchByName(searchTerm);
-                        
-                        if (response.meals && response.meals.length > 0) {
-                            displaySearchResults(response.meals);
-                        } else {
-                            modal.querySelector('#search-results').innerHTML = '<p>No recipes found. Try a different search.</p>';
-                        }
-                    } catch (error) {
-                        console.error('Search error:', error);
-                        modal.querySelector('#search-results').innerHTML = '<p>Error searching recipes. Please try again.</p>';
-                    }
-                });
-                
-                // Search on Enter key
-                modal.querySelector('#recipe-search-input').addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        modal.querySelector('#recipe-search-btn').click();
-                    }
-                });
-                
-                // Get random recipe
-                modal.querySelector('#random-recipe-btn').addEventListener('click', async function() {
-                    try {
-                        modal.querySelector('#search-results').innerHTML = '<p>Getting a random recipe...</p>';
-                        const response = await mealDbService.getRandom();
-                        
-                        if (response.meals && response.meals.length > 0) {
-                            displaySearchResults(response.meals);
-                        } else {
-                            modal.querySelector('#search-results').innerHTML = '<p>Error getting random recipe. Please try again.</p>';
-                        }
-                    } catch (error) {
-                        console.error('Random recipe error:', error);
-                        modal.querySelector('#search-results').innerHTML = '<p>Error getting random recipe. Please try again.</p>';
-                    }
-                });
-                
-                // Display search results
-                function displaySearchResults(meals) {
-                    const resultsContainer = modal.querySelector('#search-results');
-                    resultsContainer.innerHTML = '';
-                    
-                    if (!meals || meals.length === 0) {
-                        resultsContainer.innerHTML = '<p>No recipes found.</p>';
-                        return;
-                    }
-                    
-                    // Create result cards
-                    meals.forEach(meal => {
-                        const card = document.createElement('div');
-                        card.className = 'recipe-search-card';
-                        card.innerHTML = `
-                            <div class="recipe-search-img">
-                                <img src="${meal.strMealThumb}" alt="${meal.strMeal}">
-                            </div>
-                            <div class="recipe-search-info">
-                                <h3>${meal.strMeal}</h3>
-                                <div class="recipe-search-meta">
-                                    ${meal.strCategory ? `<span class="tag">${meal.strCategory}</span>` : ''}
-                                    ${meal.strArea ? `<span class="tag">${meal.strArea}</span>` : ''}
-                                </div>
-                                <div class="recipe-search-actions">
-                                    <button class="btn import-recipe-btn" data-meal-id="${meal.idMeal}">Import Recipe</button>
-                                </div>
-                            </div>
-                        `;
-                        resultsContainer.appendChild(card);
-                        
-                        // Handle import button click
-                        card.querySelector('.import-recipe-btn').addEventListener('click', async function() {
-                            const mealId = this.dataset.mealId;
-                            try {
-                                const response = await mealDbService.getById(mealId);
-                                if (response.meals && response.meals.length > 0) {
-                                    const cycleId = cycleSelector.value;
-                                    const dayIndex = parseInt(daySelector.value);
-                                    const mealType = mealSelector.value;
-                                    
-                                    // Convert MealDB meal to our format
-                                    const mealEntry = convertMealDbToRecipe(response.meals[0], mealType);
-                                    
-                                    // Update the recipe in the cycle
-                                    const cycles = getMealCycles();
-                                    if (!cycles[cycleId]) {
-                                        cycles[cycleId] = {};
-                                    }
-                                    if (!cycles[cycleId][dayIndex]) {
-                                        cycles[cycleId][dayIndex] = {};
-                                    }
-                                    
-                                    // Merge with existing day data
-                                    Object.assign(cycles[cycleId][dayIndex], mealEntry);
-                                    
-                                    // Save updates
-                                    saveMealCycles(cycles);
-                                    
-                                    // Close modal and refresh form
-                                    modal.style.display = 'none';
-                                    loadRecipeToForm();
-                                    
-                                    alert(`Imported "${response.meals[0].strMeal}" successfully!`);
-                                }
-                            } catch (error) {
-                                console.error('Import error:', error);
-                                alert('Error importing recipe. Please try again.');
-                            }
-                        });
-                    });
-                }
-            }
-            
-            // Show the modal
-            document.getElementById('recipe-search-modal').style.display = 'block';
-        }
-        
-        // Add import entire cycle functionality
-        if (importCycleBtn) {
-            importCycleBtn.addEventListener('click', function() {
-                const cycleId = cycleSelector.value;
-                if (confirm(`This will replace all recipes in cycle "${generateCycleLabel(cycleId)}" with recipes from TheMealDB. Continue?`)) {
-                    showImportOptionsModal(cycleId);
-                }
-            });
-        }
-        
-        // ... existing code for updating and handling forms ...
-        
-        // Initialize the form
-        populateCycleSelector();
-    }
-    
-    // --- MOBILE MENU FUNCTIONALITY ---
-    const menuToggle = document.querySelector('.mobile-menu-toggle');
-    const mainNav = document.querySelector('.main-nav');
-    
-    // Create menu overlay
-    const menuOverlay = document.createElement('div');
-    menuOverlay.className = 'menu-overlay';
-    document.body.appendChild(menuOverlay);
-    
-    if (menuToggle && mainNav) {
-        menuToggle.addEventListener('click', function() {
-            mainNav.classList.toggle('active');
-            menuOverlay.classList.toggle('active');
-            document.body.style.overflow = mainNav.classList.contains('active') ? 'hidden' : '';
-        });
-        
-        // Close menu when clicking outside
-        menuOverlay.addEventListener('click', function() {
-            mainNav.classList.remove('active');
-            menuOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-        
-        // Close menu when clicking a link (for mobile)
-        mainNav.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function() {
-                mainNav.classList.remove('active');
-                menuOverlay.classList.remove('active');
-                document.body.style.overflow = '';
-            });
-        });
-    }
-    
-    // --- MOBILE-FRIENDLY ENHANCEMENTS ---
-    // Add responsive table indicators if tables exist
-    const mealTables = document.querySelectorAll('.meal-table');
-    if (mealTables.length > 0) {
-        mealTables.forEach(table => {
-            const tableWrapper = table.closest('.table-responsive');
-            if (tableWrapper) {
-                const indicator = document.createElement('div');
-                indicator.className = 'swipe-indicator';
-                indicator.innerHTML = '<i class="fas fa-arrows-left-right"></i> Swipe to view more';
-                indicator.style.textAlign = 'center';
-                indicator.style.fontSize = '0.85rem';
-                indicator.style.color = '#666';
-                indicator.style.padding = '0.5rem 0';
-                indicator.style.display = 'none';
-                
-                // Only show on small screens
-                const showIndicator = () => {
-                    if (window.innerWidth < 768 && tableWrapper.scrollWidth > tableWrapper.clientWidth) {
-                        indicator.style.display = 'block';
-                    } else {
-                        indicator.style.display = 'none';
-                    }
-                };
-                
-                showIndicator();
-                window.addEventListener('resize', showIndicator);
-                
-                tableWrapper.parentNode.insertBefore(indicator, tableWrapper);
-            }
-        });
-    }
-    
-    // --- NEW: Spoonacular API + cache ---
+    // --- SPOONACULAR API + CACHE ---
     const SPOON_API_KEY = '10db2333d8ff4fc18cda19739a6e3e43';
     const SPOON_CACHE = 'spoonacularCache';
 
@@ -1420,92 +825,58 @@ document.addEventListener('DOMContentLoaded', function() {
         return results;
     }
 
-    // --- NEW: autocomplete on Recipe Title ---
-    function setupRecipeAutocomplete() {
-        const inp = document.getElementById('recipe-title');
-        const list = document.getElementById('recipe-suggestions');
-        if (!inp || !list) return;
-        let timer;
-        inp.addEventListener('input', _ => {
-            clearTimeout(timer);
-            timer = setTimeout(async () => {
-                const q = inp.value.trim();
-                list.innerHTML = '';
-                if (q.length < 2) return;
-                const arr = await fetchSpoon(q);
-                arr.forEach(title => {
-                    const li = document.createElement('li');
-                    li.textContent = title;
-                    li.onclick = _ => {
-                        inp.value = title;
-                        list.innerHTML = '';
-                    };
-                    list.appendChild(li);
-                });
-            }, 300);
+    // Tab functionality for meal plans
+    const showWeek = (weekNum) => {
+        document.querySelectorAll('.meal-week').forEach(week => {
+            week.classList.remove('active');
         });
-        document.addEventListener('click', e => {
-            if (!inp.contains(e.target)) list.innerHTML = '';
+        document.querySelectorAll('.tab-btn').forEach(tab => {
+            tab.classList.remove('active');
         });
+        
+        document.getElementById(`week${weekNum}`).classList.add('active');
+        document.querySelectorAll('.tab-btn')[weekNum-1].classList.add('active');
+    };
+    
+    // Make functions available globally
+    window.showWeek = showWeek;
+    window.getMealCycles = getMealCycles;
+    window.saveMealCycles = saveMealCycles;
+    window.saveRecipeCycle = saveRecipeCycle;
+    window.getMealForDate = getMealForDate;
+    window.getCycleIdForDate = getCycleIdForDate;
+    window.getDayIndexInCycle = getDayIndexInCycle;
+    window.formatDateYMD = formatDateYMD;
+    window.formatDateForDisplay = formatDateForDisplay;
+    window.generateCycleLabel = generateCycleLabel;
+    window.getActiveMealCycles = getActiveMealCycles;
+    window.initWeeklyCalendar = initWeeklyCalendar;
+    window.initMonthlyCalendar = initMonthlyCalendar;
+    window.initAnnualCalendar = initAnnualCalendar;
+    window.getMealPlanAndTrackingForDate = getMealPlanAndTrackingForDate;
+    window.formatDateISO = formatDateISO;
+    window.openMealDetails = openMealDetails;
+    window.mealDbService = mealDbService;
+    window.importMealsForCycle = importMealsForCycle;
+    window.convertMealDbToRecipe = convertMealDbToRecipe;
+    window.fetchSpoon = fetchSpoon;
+    
+    // Initialize calendar if elements exist
+    if (document.getElementById('week-calendar-grid')) {
+        initWeeklyCalendar(new Date());
     }
-
-    // --- NEW: monthly calendar for recipe-management ---
-    function initRecipeCalendar(date) {
-        const grid = document.getElementById('recipe-calendar-grid');
-        const title = document.getElementById('calendar-title');
-        if (!grid || !title) return;
-        const year = date.getFullYear(), month = date.getMonth();
-        const first = new Date(year, month, 1), last = new Date(year, month + 1, 0);
-        title.textContent = first.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-        grid.innerHTML = '';
-        // weekday headers
-        ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(d => {
-            const hd = document.createElement('div');
-            hd.className = 'calendar-weekday';
-            hd.textContent = d;
-            grid.appendChild(hd);
-        });
-        // padding
-        for (let i = 0; i < first.getDay(); i++) {
-            const e = document.createElement('div'); e.className = 'calendar-day inactive'; grid.appendChild(e);
+    
+    // Check for tracking page loading with a date parameter - prevent auto-scrolling
+    if (window.location.pathname.includes('tracking.html')) {
+        const selectedDateStr = sessionStorage.getItem('selectedDate');
+        if (selectedDateStr) {
+            const selectedDate = new Date(selectedDateStr);
+            if (!isNaN(selectedDate.getTime())) {
+                setTimeout(() => {
+                    window.navigateToDate && window.navigateToDate(selectedDate);
+                    sessionStorage.removeItem('selectedDate'); // Clear after use
+                }, 500);
+            }
         }
-        // days
-        for (let d = 1; d <= last.getDate(); d++) {
-            const cell = document.createElement('div');
-            cell.className = 'calendar-day';
-            cell.textContent = d;
-            if (new Date(year, month, d).toDateString() === new Date().toDateString()) cell.classList.add('today');
-            cell.onclick = _ => {
-                const daySel = document.getElementById('manage-day-selector');
-                if (daySel) {
-                    daySel.value = d;
-                    daySel.dispatchEvent(new Event('change'));
-                }
-            };
-            grid.appendChild(cell);
-        }
-    }
-
-    // wire prev/next month
-    function wireRecipeCalendarNav() {
-        let cur = new Date();
-        document.getElementById('prev-month').onclick = _ => {
-            cur.setMonth(cur.getMonth() - 1);
-            initRecipeCalendar(cur);
-        };
-        document.getElementById('next-month').onclick = _ => {
-            cur.setMonth(cur.getMonth() + 1);
-            initRecipeCalendar(cur);
-        };
-    }
-
-    // --- hook into existing init for recipe-manager ---
-    if (document.getElementById('recipe-management')) {
-        document.addEventListener('DOMContentLoaded', () => {
-            // ...existing initializeRecipeManager code...
-            setupRecipeAutocomplete();
-            initRecipeCalendar(new Date());
-            wireRecipeCalendarNav();
-        }, { once: true });
     }
 });
