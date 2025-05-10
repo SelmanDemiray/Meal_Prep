@@ -90,10 +90,74 @@
         
         <section class="cycle-management mb-4">
             <div id="cycle-manager" class="cycle-selector mb-3">
-                <label for="view-cycle-selector">Select Meal Cycle:</label>
-                <div class="selector-controls">
-                    <select id="view-cycle-selector" class="form-control"></select>
-                    <a href="recipe-management.html" class="btn"><i class="fas fa-edit"></i> Manage Recipes</a>
+                <h3 class="mb-2">Meal Cycle Manager</h3>
+                
+                <div class="meal-cycle-toolbar">
+                    <div class="cycle-period-selector">
+                        <button class="cycle-period-btn active" data-period="daily">Daily</button>
+                        <button class="cycle-period-btn" data-period="weekly">Weekly</button>
+                        <button class="cycle-period-btn" data-period="monthly">Monthly</button>
+                    </div>
+                    
+                    <div class="cycle-tools">
+                        <div class="search-box">
+                            <input type="text" id="cycle-search" placeholder="Search cycles...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <button id="new-cycle-btn" class="btn"><i class="fas fa-plus"></i> New Cycle</button>
+                    </div>
+                </div>
+                
+                <div class="meal-cycle-container">
+                    <div class="available-cycles">
+                        <div class="cycles-header">
+                            <h4>Available Meal Cycles</h4>
+                            <div class="sort-options">
+                                <select id="cycle-sort" class="form-control">
+                                    <option value="date-new">Newest First</option>
+                                    <option value="date-old">Oldest First</option>
+                                    <option value="name">Sort by Name</option>
+                                    <option value="favorite">Favorites First</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div id="available-cycles-list" class="draggable-cycles-list">
+                            <!-- Will be populated with draggable meal cycles -->
+                        </div>
+                        
+                        <div id="no-cycles-message" class="empty-state" style="display:none;">
+                            <i class="fas fa-utensils"></i>
+                            <p>No meal cycles found</p>
+                        </div>
+                    </div>
+                    
+                    <div class="tool-panel">
+                        <div id="recycle-bin" class="recycle-bin">
+                            <div class="bin-icon">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                            <span>Drop to Delete</span>
+                            <div class="recycle-bin-overlay">
+                                <i class="fas fa-check"></i>
+                            </div>
+                        </div>
+                        
+                        <div id="cycle-preview" class="cycle-preview">
+                            <h5>Cycle Preview</h5>
+                            <div class="cycle-preview-content">
+                                <p class="empty-preview">Hover over a cycle to preview contents</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="instruction-panel">
+                    <p class="instruction-text">
+                        <i class="fas fa-info-circle"></i>
+                        Drag meal cycles to the calendar to assign them. Drag from calendar to the bin to remove.
+                        <span class="tip">Pro Tip: Hover over any cycle to preview its contents</span>
+                    </p>
                 </div>
             </div>
             
@@ -425,6 +489,57 @@
         </a>
         <div class="quick-access-btn" id="today-btn" title="Go to Today">
             <i class="fas fa-calendar-day"></i>
+        </div>
+    </div>
+
+    <!-- Conflict Resolution Dialog -->
+    <div id="conflict-dialog" class="modal-dialog">
+        <div class="modal-dialog-content">
+            <h4>Meal Conflict Detected</h4>
+            <p>There are already meals scheduled for some days in this time period.</p>
+            
+            <div class="conflict-options">
+                <button id="replace-meals-btn" class="btn">Replace Existing Meals</button>
+                <button id="keep-meals-btn" class="btn btn-secondary">Keep Existing Meals</button>
+                <button id="cancel-placement-btn" class="btn btn-outline">Cancel</button>
+            </div>
+        </div>
+    </div>
+ Cycle Modal -->
+    <footer>
+        <p>&copy; 2023 Meal Prep Tracker. Created for personal use.</p>class="modal-dialog-content">
+    </footer>
+    <script src="js/meal-core.js"></script>="margin-bottom: 1rem; text-align: left;">
+    <script src="js/meal-ui.js"></script>         <label for="new-cycle-year" style="display: block; margin-bottom: 0.5rem;">Year:</label>
+</body>         <input type="number" id="new-cycle-year" class="form-control" min="2023" max="2050" value="2023" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
+</html>            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem; text-align: left;">
+                <label for="new-cycle-import" style="display: block; margin-bottom: 0.5rem;">Import recipes:</label>
+                <select id="new-cycle-import" class="form-control" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
+                    <option value="empty">Create empty cycle</option>
+                    <option value="import">Import from MealDB</option>
+                    <option value="sample">Use sample recipes</option>
+                </select>
+            </div>
+            
+            <div class="conflict-options">
+                <button id="create-cycle-btn" class="btn">Create Cycle</button>
+                <button id="cancel-cycle-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal-dialog">
+        <div class="modal-dialog-content">
+            <h4 id="confirm-title">Confirm Action</h4>
+            <p id="confirm-message">Are you sure?</p>
+            
+            <div class="conflict-options">
+                <button id="confirm-yes" class="btn">Yes</button>
+                <button id="confirm-no" class="btn btn-secondary">No</button>
+            </div>
         </div>
     </div>
 

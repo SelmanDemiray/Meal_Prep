@@ -246,6 +246,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize weekly calendar
     function initWeeklyCalendar(date) {
+        // Update global date reference if it exists
+        if (window.currentCalendarDate) {
+            window.currentCalendarDate = new Date(date);
+        }
+        
         const startOfWeek = new Date(date);
         startOfWeek.setDate(date.getDate() - date.getDay()); // Start from Sunday
         
@@ -279,6 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Create day cell
             const dayElement = document.createElement('div');
             dayElement.className = 'calendar-day';
+            dayElement.dataset.date = formatDateISO(dayDate); // Add date as data attribute
             
             // Add today marker
             if (dayDate.toDateString() === new Date().toDateString()) {
@@ -304,32 +310,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 breakfast.className = 'calendar-meal breakfast';
                 if (dayInfo.breakfastCompleted) breakfast.classList.add('calendar-meal-completed');
                 breakfast.textContent = `B: ${dayInfo.breakfast}`;
-                breakfast.setAttribute('data-date', formatDateISO(dayDate));
-                breakfast.setAttribute('data-meal', 'breakfast');
+                breakfast.dataset.date = formatDateISO(dayDate);
+                breakfast.dataset.meal = 'breakfast';
                 breakfast.addEventListener('click', () => openMealDetails(dayDate, 'breakfast'));
                 mealsList.appendChild(breakfast);
             }
             
-            // Add lunch
+            // Add lunch (with data attributes for drag-and-drop)
             if (dayInfo.lunch) {
                 const lunch = document.createElement('div');
                 lunch.className = 'calendar-meal lunch';
                 if (dayInfo.lunchCompleted) lunch.classList.add('calendar-meal-completed');
                 lunch.textContent = `L: ${dayInfo.lunch}`;
-                lunch.setAttribute('data-date', formatDateISO(dayDate));
-                lunch.setAttribute('data-meal', 'lunch');
+                lunch.dataset.date = formatDateISO(dayDate);
+                lunch.dataset.meal = 'lunch';
                 lunch.addEventListener('click', () => openMealDetails(dayDate, 'lunch'));
                 mealsList.appendChild(lunch);
             }
             
-            // Add dinner
+            // Add dinner (with data attributes for drag-and-drop)
             if (dayInfo.dinner) {
                 const dinner = document.createElement('div');
                 dinner.className = 'calendar-meal dinner';
                 if (dayInfo.dinnerCompleted) dinner.classList.add('calendar-meal-completed');
                 dinner.textContent = `D: ${dayInfo.dinner}`;
-                dinner.setAttribute('data-date', formatDateISO(dayDate));
-                dinner.setAttribute('data-meal', 'dinner');
+                dinner.dataset.date = formatDateISO(dayDate);
+                dinner.dataset.meal = 'dinner';
                 dinner.addEventListener('click', () => openMealDetails(dayDate, 'dinner'));
                 mealsList.appendChild(dinner);
             }
