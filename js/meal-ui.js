@@ -1364,13 +1364,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (selectedCycles.length > 0 && selectedCycles.includes(e.target.dataset.cycleId)) {
                 e.dataTransfer.setData('text/plain', JSON.stringify({
                     type: 'multi',
-                    ids: selectedCycles
+                    ids: selectedCycles,
+                    dragSource: 'cyclesList' // Add source information
                 }));
             } else {
                 e.dataTransfer.setData('text/plain', JSON.stringify({
                     type: 'single',
                     id: e.target.dataset.cycleId,
-                    cycleType: e.target.dataset.cycleType
+                    cycleType: e.target.dataset.cycleType,
+                    dragSource: 'cyclesList' // Add source information
                 }));
             }
             
@@ -1614,6 +1616,32 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Show animation
                         this.classList.add('item-deleted');
                         setTimeout(() => this.classList.remove('item-deleted'), 600);
+                    } 
+                    // Handle dropping cycle items into recycle bin
+                    else if (dragData.dragSource === 'cyclesList') {
+                        if (dragData.type === 'single') {
+                            // Delete single cycle
+                            showConfirmationModal(
+                                'Delete Cycle',
+                                `Are you sure you want to delete this cycle?`,
+                                () => {
+                                    deleteCycle(dragData.id);
+                                    this.classList.add('item-deleted');
+                                    setTimeout(() => this.classList.remove('item-deleted'), 600);
+                                }
+                            );
+                        } else if (dragData.type === 'multi') {
+                            // Delete multiple cycles
+                            showConfirmationModal(
+                                'Delete Multiple Cycles',
+                                `Are you sure you want to delete ${dragData.ids.length} cycles?`,
+                                () => {
+                                    dragData.ids.forEach(id => deleteCycle(id));
+                                    this.classList.add('item-deleted');
+                                    setTimeout(() => this.classList.remove('item-deleted'), 600);
+                                }
+                            );
+                        }
                     }
                 } catch (err) {
                     console.error('Error processing drag data:', err);
@@ -1621,380 +1649,77 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Add cycle to calendar
-        function placeDailyCycle(cycleId, date, showAnimation = true) {
-            // Extract the original cycleId and dayIndex
-            const [origCycleId, dayIndex] = cycleId.split('-');
+        // Add new function to delete a cycle
+        function deleteCycle(cycleId) {
+            // For daily/weekly formats, extract the base cycle id
+            let baseCycleId = cycleId;
+            if (cycleId.includes('-week')) {
+                // Extract base cycle ID for weekly format
+                baseCycleId = cycleId.split('-week')[0];
+            } else if (cycleId.includes('-') && cycleId.split('-').length > 2) {
+                // Extract base cycle ID for daily format (YYYY-NN-D)
+                const parts = cycleId.split('-');
+                baseCycleId = `${parts[0]}-${parts[1]}`;
+            }
             
+            // Check if we're deleting a full cycle or just a day/week
             const cycles = window.getMealCycles();
-            if (!cycles[origCycleId] || !cycles[origCycleId][dayIndex]) return;
             
-            const mealData = cycles[origCycleId][dayIndex];
-            
-            // Check if there's already a meal on this date
-            const existingMeals = getExistingMealsForDate(date);
-            
-            // Check for overlaps
-            let hasOverlap = false;
-            const conflicts = [];
-            
-            if (mealData.breakfast && (existingMeals.breakfastPlanned || existingMeals.breakfastCompleted)) {
-                hasOverlap = true;
-                conflicts.push('breakfast');
-            }
-            if (mealData.lunch && (existingMeals.lunchPlanned || existingMeals.lunchCompleted)) {
-                hasOverlap = true;
-                conflicts.push('lunch');
-            }
-            if (mealData.dinner && (existingMeals.dinnerPlanned || existingMeals.dinnerCompleted)) {
-                hasOverlap = true;
-                conflicts.push('dinner');
-            }
-            
-            if (hasOverlap) {
-                // Handle conflict with a modal dialog
-                showConfirmationModal(
-                    'Meal Conflict',
-                    `There are already ${conflicts.join(', ')} meals scheduled for ${date.toLocaleDateString()}. Replace them?`,
-                    () => {
-                        // Yes, replace existing meals
-                        addMealDataToDay(mealData, date, showAnimation);
+            if (currentPeriod === 'monthly' || cycleId === baseCycleId) {
+                // Delete an entire cycle
+                if (cycles[cycleId]) {
+                    delete cycles[cycleId];
+                    window.saveMealCycles(cycles);
+                    showToast('Cycle deleted successfully');
+                }
+            } 
+            else if (currentPeriod === 'daily' && cycleId.includes('-')) {
+                // Delete a specific day from a cycle
+                const [origCycleId, dayIndex] = cycleId.split('-');
+                if (cycles[origCycleId] && cycles[origCycleId][dayIndex]) {
+                    delete cycles[origCycleId][dayIndex];
+                    
+                    // If cycle is now empty, delete the whole cycle
+                    if (Object.keys(cycles[origCycleId]).length === 0) {
+                        delete cycles[origCycleId];
                     }
-                );
-            } else {
-                // No conflict, add directly
-                addMealDataToDay(mealData, date, showAnimation);
-            }
-        }
-        
-        function placeWeeklyCycle(cycleId, startDate, showAnimation = true) {
-            // Extract the original cycleId and week number
-            const [origCycleId, weekPart] = cycleId.split('-week');
-            const weekIndex = parseInt(weekPart) - 1;
-            
-            const cycles = window.getMealCycles();
-            if (!cycles[origCycleId]) return;
-            
-            // Calculate day range for this week
-            const firstDayIndex = weekIndex * 7;
-            const lastDayIndex = firstDayIndex + 6;
-            
-            // Check for overlaps across the whole week
-            let hasOverlap = false;
-            const conflicts = [];
-            
-            for (let i = 0; i < 7; i++) {
-                const dayDate = new Date(startDate);
-                dayDate.setDate(startDate.getDate() + i);
-                
-                const dayIndex = firstDayIndex + i;
-                if (!cycles[origCycleId][dayIndex]) continue;
-                
-                const mealData = cycles[origCycleId][dayIndex];
-                const existingMeals = getExistingMealsForDate(dayDate);
-                const dateStr = dayDate.toLocaleDateString();
-                
-                if (mealData.breakfast && (existingMeals.breakfastPlanned || existingMeals.breakfastCompleted)) {
-                    hasOverlap = true;
-                    if (!conflicts.includes(dateStr)) conflicts.push(dateStr);
-                }
-                if (mealData.lunch && (existingMeals.lunchPlanned || existingMeals.lunchCompleted)) {
-                    hasOverlap = true;
-                    if (!conflicts.includes(dateStr)) conflicts.push(dateStr);
-                }
-                if (mealData.dinner && (existingMeals.dinnerPlanned || existingMeals.dinnerCompleted)) {
-                    hasOverlap = true;
-                    if (!conflicts.includes(dateStr)) conflicts.push(dateStr);
+                    
+                    window.saveMealCycles(cycles);
+                    showToast('Day deleted from cycle');
                 }
             }
-            
-            if (hasOverlap) {
-                // Handle conflict with a modal dialog
-                showConfirmationModal(
-                    'Meal Conflicts',
-                    `There are already meals scheduled on ${conflicts.length} days in this period. Replace them?`,
-                    () => {
-                        // Yes, replace existing meals
-                        addWeeklyMealsToCalendar(cycles, origCycleId, firstDayIndex, startDate, showAnimation);
-                    }
-                );
-            } else {
-                // No conflict, add directly
-                addWeeklyMealsToCalendar(cycles, origCycleId, firstDayIndex, startDate, showAnimation);
-            }
-        }
-        
-        function addWeeklyMealsToCalendar(cycles, origCycleId, firstDayIndex, startDate, showAnimation) {
-            // Add all meals to the calendar with staggered animation
-            const trackingData = localStorage.getItem('trackingData');
-            const parsedData = trackingData ? JSON.parse(trackingData) : {};
-            
-            // Collect all the days to update
-            const daysToUpdate = [];
-            
-            for (let i = 0; i < 7; i++) {
-                const dayDate = new Date(startDate);
-                dayDate.setDate(startDate.getDate() + i);
+            else if (currentPeriod === 'weekly' && cycleId.includes('-week')) {
+                // Delete a specific week from a cycle
+                const [origCycleId, weekPart] = cycleId.split('-week');
+                const weekIndex = parseInt(weekPart) - 1;
                 
-                const dayIndex = firstDayIndex + i;
-                if (!cycles[origCycleId][dayIndex]) continue;
-                
-                const mealData = cycles[origCycleId][dayIndex];
-                const dateStr = window.formatDateISO(dayDate);
-                
-                // Initialize day data structure
-                if (!parsedData[dateStr]) {
-                    parsedData[dateStr] = {};
-                }
-                
-                // Record meal info and mark as planned
-                if (mealData.breakfast) {
-                    parsedData[dateStr].breakfast = mealData.breakfast;
-                    parsedData[dateStr].breakfastRecipe = mealData.breakfastRecipe;
-                    parsedData[dateStr].breakfastPlanned = true;
-                }
-                
-                if (mealData.lunch) {
-                    parsedData[dateStr].lunch = mealData.lunch;
-                    parsedData[dateStr].lunchRecipe = mealData.lunchRecipe;
-                    parsedData[dateStr].lunchPlanned = true;
-                }
-                
-                if (mealData.dinner) {
-                    parsedData[dateStr].dinner = mealData.dinner;
-                    parsedData[dateStr].dinnerRecipe = mealData.dinnerRecipe;
-                    parsedData[dateStr].dinnerPlanned = true;
-                }
-                
-                daysToUpdate.push(dayDate);
-            }
-            
-            // Save all changes at once
-            localStorage.setItem('trackingData', JSON.stringify(parsedData));
-            
-            // Refresh the calendar
-            window.initWeeklyCalendar && window.initWeeklyCalendar(startDate);
-            
-            // Show success animation on each day with staggered timing
-            if (showAnimation) {
-                daysToUpdate.forEach((date, index) => {
-                    setTimeout(() => {
-                        const dateStr = window.formatDateISO(date);
-                        const dayElement = document.querySelector(`.calendar-day[data-date="${dateStr}"]`);
-                        if (dayElement) {
-                            dayElement.classList.add('placement-success');
-                            setTimeout(() => dayElement.classList.remove('placement-success'), 1000);
+                if (cycles[origCycleId]) {
+                    // Calculate day indices for this week (0-6, 7-13, etc.)
+                    const firstDayIndex = weekIndex * 7;
+                    const lastDayIndex = firstDayIndex + 6;
+                    
+                    // Delete all days in this week range
+                    for (let i = firstDayIndex; i <= lastDayIndex; i++) {
+                        if (cycles[origCycleId][i]) {
+                            delete cycles[origCycleId][i];
                         }
-                    }, index * 100);
-                });
-                
-                showToast(`Added ${daysToUpdate.length} days to your calendar`);
-            }
-        }
-        
-        function placeMonthlyCycle(cycleId, startDate, showAnimation = true) {
-            const cycles = window.getMealCycles();
-            if (!cycles[cycleId]) return;
-            
-            // Check for overlaps across the whole month
-            let hasOverlap = false;
-            const conflicts = [];
-            
-            for (let i = 0; i < 30; i++) {
-                const dayDate = new Date(startDate);
-                dayDate.setDate(startDate.getDate() + i);
-                
-                if (!cycles[cycleId][i]) continue;
-                
-                const mealData = cycles[cycleId][i];
-                const existingMeals = getExistingMealsForDate(dayDate);
-                const dateStr = dayDate.toLocaleDateString();
-                
-                if (mealData.breakfast && (existingMeals.breakfastPlanned || existingMeals.breakfastCompleted)) {
-                    hasOverlap = true;
-                    if (!conflicts.includes(dateStr)) conflicts.push(dateStr);
-                }
-                if (mealData.lunch && (existingMeals.lunchPlanned || existingMeals.lunchCompleted)) {
-                    hasOverlap = true;
-                    if (!conflicts.includes(dateStr)) conflicts.push(dateStr);
-                }
-                if (mealData.dinner && (existingMeals.dinnerPlanned || existingMeals.dinnerCompleted)) {
-                    hasOverlap = true;
-                    if (!conflicts.includes(dateStr)) conflicts.push(dateStr);
-                }
-            }
-            
-            if (hasOverlap) {
-                // Handle conflict with a modal dialog
-                showConfirmationModal(
-                    'Meal Conflicts',
-                    `There are already meals scheduled on ${conflicts.length} days in this period. Replace them?`,
-                    () => {
-                        // Yes, replace existing meals
-                        addMonthlyCycleToCalendar(cycles, cycleId, startDate, showAnimation);
                     }
-                );
-            } else {
-                // No conflict, add directly
-                addMonthlyCycleToCalendar(cycles, cycleId, startDate, showAnimation);
-            }
-        }
-        
-        function addMonthlyCycleToCalendar(cycles, cycleId, startDate, showAnimation) {
-            // Add all meals to the calendar
-            const trackingData = localStorage.getItem('trackingData');
-            const parsedData = trackingData ? JSON.parse(trackingData) : {};
-            
-            // Counter for added meals
-            let addedCount = 0;
-            const daysToUpdate = [];
-            
-            for (let i = 0; i < 30; i++) {
-                const dayDate = new Date(startDate);
-                dayDate.setDate(startDate.getDate() + i);
-                
-                if (!cycles[cycleId][i]) continue;
-                
-                const mealData = cycles[cycleId][i];
-                const dateStr = window.formatDateISO(dayDate);
-                
-                if (!parsedData[dateStr]) {
-                    parsedData[dateStr] = {};
-                }
-                
-                // Record meal info and mark as planned
-                let mealsAdded = 0;
-                
-                if (mealData.breakfast) {
-                    parsedData[dateStr].breakfast = mealData.breakfast;
-                    parsedData[dateStr].breakfastRecipe = mealData.breakfastRecipe;
-                    parsedData[dateStr].breakfastPlanned = true;
-                    mealsAdded++;
-                }
-                
-                if (mealData.lunch) {
-                    parsedData[dateStr].lunch = mealData.lunch;
-                    parsedData[dateStr].lunchRecipe = mealData.lunchRecipe;
-                    parsedData[dateStr].lunchPlanned = true;
-                    mealsAdded++;
-                }
-                
-                if (mealData.dinner) {
-                    parsedData[dateStr].dinner = mealData.dinner;
-                    parsedData[dateStr].dinnerRecipe = mealData.dinnerRecipe;
-                    parsedData[dateStr].dinnerPlanned = true;
-                    mealsAdded++;
-                }
-                
-                if (mealsAdded > 0) {
-                    addedCount += mealsAdded;
-                    daysToUpdate.push(dayDate);
+                    
+                    // If cycle is now empty, delete the whole cycle
+                    if (Object.keys(cycles[origCycleId]).length === 0) {
+                        delete cycles[origCycleId];
+                    }
+                    
+                    window.saveMealCycles(cycles);
+                    showToast('Week deleted from cycle');
                 }
             }
             
-            // Save all changes at once
-            localStorage.setItem('trackingData', JSON.stringify(parsedData));
+            // Refresh the cycles list display
+            loadAvailableCycles();
             
-            // Refresh the calendar
-            window.initWeeklyCalendar && window.initWeeklyCalendar(startDate);
-            
-            // Show success animation
-            if (showAnimation) {
-                // We can't animate all 30 days effectively, so just animate days in view
-                const visibleDays = document.querySelectorAll('.calendar-day:not(.inactive)');
-                visibleDays.forEach((day, index) => {
-                    setTimeout(() => {
-                        day.classList.add('placement-success');
-                        setTimeout(() => day.classList.remove('placement-success'), 1000);
-                    }, index * 50);
-                });
-                
-                showToast(`Added ${addedCount} meals across ${daysToUpdate.length} days`);
-            }
-        }
-        
-        // Add meal data to a specific day
-        function addMealDataToDay(mealData, date, showAnimation = true) {
-            const trackingData = localStorage.getItem('trackingData');
-            const parsedData = trackingData ? JSON.parse(trackingData) : {};
-            const dateStr = window.formatDateISO(date);
-            
-            if (!parsedData[dateStr]) {
-                parsedData[dateStr] = {};
-            }
-            
-            // Record meal info and mark as planned
-            if (mealData.breakfast) {
-                parsedData[dateStr].breakfast = mealData.breakfast;
-                parsedData[dateStr].breakfastRecipe = mealData.breakfastRecipe;
-                parsedData[dateStr].breakfastPlanned = true;
-            }
-            
-            if (mealData.lunch) {
-                parsedData[dateStr].lunch = mealData.lunch;
-                parsedData[dateStr].lunchRecipe = mealData.lunchRecipe;
-                parsedData[dateStr].lunchPlanned = true;
-            }
-            
-            if (mealData.dinner) {
-                parsedData[dateStr].dinner = mealData.dinner;
-                parsedData[dateStr].dinnerRecipe = mealData.dinnerRecipe;
-                parsedData[dateStr].dinnerPlanned = true;
-            }
-            
-            localStorage.setItem('trackingData', JSON.stringify(parsedData));
-            
-            // Refresh the calendar
-            window.initWeeklyCalendar && window.initWeeklyCalendar(date);
-            
-            // Show success animation
-            if (showAnimation) {
-                const dayElement = document.querySelector(`.calendar-day[data-date="${dateStr}"]`);
-                if (dayElement) {
-                    dayElement.classList.add('placement-success');
-                    setTimeout(() => dayElement.classList.remove('placement-success'), 1000);
-                }
-                
-                showToast('Meal added to calendar');
-            }
-        }
-        
-        // Get existing meals for a date
-        function getExistingMealsForDate(date) {
-            const dateStr = window.formatDateISO(date);
-            const trackingData = localStorage.getItem('trackingData');
-            if (!trackingData) return {};
-            
-            const parsedData = JSON.parse(trackingData);
-            return parsedData[dateStr] || {};
-        }
-        
-        // Remove meal from calendar
-        function removeMealFromCalendar(dateStr, mealType) {
-            const trackingData = localStorage.getItem('trackingData');
-            if (!trackingData) return;
-            
-            const parsedData = JSON.parse(trackingData);
-            if (!parsedData[dateStr]) return;
-            
-            // Remove the meal data and marked as planned
-            delete parsedData[dateStr][mealType];
-            delete parsedData[dateStr][`${mealType}Recipe`];
-            delete parsedData[dateStr][`${mealType}Planned`];
-            delete parsedData[dateStr][`${mealType}Completed`];
-            
-            // If no data left for this date, remove the whole date entry
-            if (Object.keys(parsedData[dateStr]).length === 0) {
-                delete parsedData[dateStr];
-            }
-            
-            localStorage.setItem('trackingData', JSON.stringify(parsedData));
-            
-            // Refresh the calendar
-            const date = new Date(dateStr);
-            window.initWeeklyCalendar && window.initWeeklyCalendar(date);
-            
-            showToast(`${mealType.charAt(0).toUpperCase() + mealType.slice(1)} removed from calendar`);
+            // Clear selection if needed
+            selectedCycles = selectedCycles.filter(id => id !== cycleId);
         }
         
         // Set up period selector buttons
