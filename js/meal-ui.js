@@ -1020,11 +1020,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize meal cycle manager with drag and drop
     function initMealCycleManager() {
+        const newCycleBtn = document.getElementById('new-plan-cycle-btn');
         const cyclesList = document.getElementById('available-cycles-list');
         const recycleBin = document.getElementById('recycle-bin');
         const calendarGrid = document.getElementById('week-calendar-grid');
         const periodButtons = document.querySelectorAll('.cycle-period-btn');
-        const newCycleBtn = document.getElementById('new-cycle-btn');
         const cycleSearch = document.getElementById('cycle-search');
         const sortSelect = document.getElementById('cycle-sort');
         
@@ -1060,7 +1060,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     Object.keys(cycles).forEach(cycleId => {
                         Object.keys(cycles[cycleId]).forEach(dayIndex => {
                             const dayData = cycles[cycleId][dayIndex];
-                            const cycleName = `Day ${parseInt(dayIndex) + 1} - ${window.generateCycleLabel(cycleId)}`;
+                            // Use only the base cycleId for the label
+                            const baseCycleId = cycleId;
+                            const cycleName = `Day ${parseInt(dayIndex) + 1} - ${window.generateCycleLabel(baseCycleId)}`;
                             
                             // Skip if doesn't match search
                             if (searchTerm && !cycleName.toLowerCase().includes(searchTerm)) return;
@@ -1092,7 +1094,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                             
                             if (Object.keys(weekData).length > 0) {
-                                const cycleName = `Week ${i+1} - ${window.generateCycleLabel(cycleId)}`;
+                                const baseCycleId = cycleId;
+                                const cycleName = `Week ${i+1} - ${window.generateCycleLabel(baseCycleId)}`;
                                 
                                 // Skip if doesn't match search
                                 if (searchTerm && !cycleName.toLowerCase().includes(searchTerm)) continue;
@@ -1114,7 +1117,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Full cycles (up to 30 days)
                     Object.keys(cycles).forEach(cycleId => {
                         if (Object.keys(cycles[cycleId]).length > 0) {
-                            const cycleName = window.generateCycleLabel(cycleId);
+                            const baseCycleId = cycleId;
+                            const cycleName = window.generateCycleLabel(baseCycleId);
                             
                             // Skip if doesn't match search
                             if (searchTerm && !cycleName.toLowerCase().includes(searchTerm)) return;
@@ -2019,6 +2023,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Set up new cycle button
         function setupNewCycleButton() {
+            const newCycleBtn = document.getElementById('new-plan-cycle-btn');
             if (!newCycleBtn) return;
             
             newCycleBtn.addEventListener('click', function(e) {
@@ -2029,13 +2034,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show new cycle creation modal
         function showNewCycleModal() {
-            // Create modal if it doesn't exist
+            // Only create modal if it doesn't exist
             let modal = document.getElementById('new-cycle-modal');
             if (!modal) {
                 modal = document.createElement('div');
                 modal.id = 'new-cycle-modal';
                 modal.className = 'modal-dialog';
-                
                 modal.innerHTML = `
                     <div class="modal-dialog-content">
                         <h4>Create New Meal Cycle</h4>
@@ -2051,111 +2055,110 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <option value="sample">Use sample recipes</option>
                             </select>
                         </div>
-                        
                         <div class="conflict-options">
                             <button id="create-cycle-btn" class="btn">Create Cycle</button>
                             <button id="cancel-cycle-btn" class="btn btn-secondary">Cancel</button>
                         </div>
                     </div>
                 `;
-                
                 document.body.appendChild(modal);
-                
-                // Set up event handlers
-                document.getElementById('cancel-cycle-btn').addEventListener('click', function() {
-                    modal.classList.remove('active');
-                });
-                
-                document.getElementById('create-cycle-btn').addEventListener('click', async function() {
-                    const year = parseInt(document.getElementById('new-cycle-year').value);
-                    const importOption = document.getElementById('new-cycle-import').value;
-                    
-                    if (!year || isNaN(year)) {
-                        alert('Please enter a valid year');
-                        return;
-                    }
-                    
-                    // Find the next available cycle number
-                    const cycles = window.getMealCycles();
-                    const existingCycles = Object.keys(cycles)
-                        .filter(id => id.startsWith(`${year}-`))
-                        .map(id => parseInt(id.split('-')[1]));
-                    
-                    let nextCycleNum = 1;
-                    if (existingCycles.length > 0) {
-                        nextCycleNum = Math.max(...existingCycles) + 1;
-                    }
-                    
-                    const newCycleId = `${year}-${nextCycleNum.toString().padStart(2, '0')}`;
-                    
-                    modal.classList.remove('active');
-                    
-                    // Show loading indicator
-                    const loadingToast = showToast('Creating new cycle...', 0);
-                    
-                    try {
-                        if (importOption === 'import') {
-                            // Redirect to recipe management to handle import
-                            localStorage.setItem('pendingCycleId', newCycleId);
-                            window.location.href = 'recipe-management.html?action=import';
-                            return;
-                        } else if (importOption === 'sample') {
-                            // Use sample data
-                            const sampleMeals = window.getSampleMealPlan();
-                            const newCycle = {};
-                            
-                            // Create cycle with sample data
-                            for (let i = 0; i < Math.min(30, sampleMeals.length); i++) {
-                                newCycle[i] = sampleMeals[i];
-                            }
-                            
-                            window.saveRecipeCycle(newCycleId, newCycle);
-                        } else {
-                            // Create empty cycle
-                            const newCycle = {};
-                            for (let i = 0; i < 30; i++) {
-                                newCycle[i] = {
-                                    breakfast: `Breakfast for Day ${i+1}`,
-                                    lunch: `Lunch for Day ${i+1}`,
-                                    dinner: `Dinner for Day ${i+1}`,
-                                    breakfastRecipe: {
-                                        title: `Breakfast Recipe for Day ${i+1}`,
-                                        ingredients: ["Add ingredients here"],
-                                        instructions: ["Add instructions here"]
-                                    },
-                                    lunchRecipe: {
-                                        title: `Lunch Recipe for Day ${i+1}`,
-                                        ingredients: ["Add ingredients here"],
-                                        instructions: ["Add instructions here"]
-                                    },
-                                    dinnerRecipe: {
-                                        title: `Dinner Recipe for Day ${i+1}`,
-                                        ingredients: ["Add ingredients here"],
-                                        instructions: ["Add instructions here"]
-                                    }
-                                };
-                            }
-                            
-                            window.saveRecipeCycle(newCycleId, newCycle);
-                        }
-                        
-                        // Remove loading indicator
-                        document.body.removeChild(loadingToast);
-                        
-                        showToast(`Created new cycle: ${window.generateCycleLabel(newCycleId)}`);
-                        loadAvailableCycles();
-                    } catch (err) {
-                        console.error('Error creating cycle:', err);
-                        // Remove loading indicator
-                        document.body.removeChild(loadingToast);
-                        showToast('Error creating cycle. Please try again.', 3000, 'error');
-                    }
-                });
             }
-            
+
+            // Always (re)attach event listeners to avoid duplicates
+            const cancelBtn = modal.querySelector('#cancel-cycle-btn');
+            const createBtn = modal.querySelector('#create-cycle-btn');
+
+            // Remove previous listeners by cloning
+            const newCancelBtn = cancelBtn.cloneNode(true);
+            cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+            const newCreateBtn = createBtn.cloneNode(true);
+            createBtn.parentNode.replaceChild(newCreateBtn, createBtn);
+
+            // Cancel closes modal
+            newCancelBtn.addEventListener('click', function() {
+                modal.classList.remove('active');
+            });
+
+            // Create cycle logic
+            newCreateBtn.addEventListener('click', async function() {
+                const year = parseInt(modal.querySelector('#new-cycle-year').value);
+                const importOption = modal.querySelector('#new-cycle-import').value;
+
+                if (!year || isNaN(year)) {
+                    alert('Please enter a valid year');
+                    return;
+                }
+
+                // Find the next available cycle number
+                const cycles = window.getMealCycles();
+                const existingCycles = Object.keys(cycles)
+                    .filter(id => id.startsWith(`${year}-`))
+                    .map(id => parseInt(id.split('-')[1]));
+                let nextCycleNum = 1;
+                if (existingCycles.length > 0) {
+                    nextCycleNum = Math.max(...existingCycles) + 1;
+                }
+                const newCycleId = `${year}-${nextCycleNum.toString().padStart(2, '0')}`;
+
+                // Show loading toast (optional)
+                const loadingToast = showToast('Creating new cycle...', 0);
+
+                try {
+                    if (importOption === 'import') {
+                        localStorage.setItem('pendingCycleId', newCycleId);
+                        modal.classList.remove('active');
+                        document.body.removeChild(loadingToast);
+                        window.location.href = 'recipe-management.html?action=import';
+                        return;
+                    } else if (importOption === 'sample') {
+                        const sampleMeals = window.getSampleMealPlan();
+                        const newCycle = {};
+                        for (let i = 0; i < Math.min(30, sampleMeals.length); i++) {
+                            newCycle[i] = sampleMeals[i];
+                        }
+                        window.saveRecipeCycle(newCycleId, newCycle);
+                    } else {
+                        // Create empty cycle
+                        const newCycle = {};
+                        for (let i = 0; i < 30; i++) {
+                            newCycle[i] = {
+                                breakfast: `Breakfast for Day ${i+1}`,
+                                lunch: `Lunch for Day ${i+1}`,
+                                dinner: `Dinner for Day ${i+1}`,
+                                breakfastRecipe: {
+                                    title: `Breakfast Recipe for Day ${i+1}`,
+                                    ingredients: ["Add ingredients here"],
+                                    instructions: ["Add instructions here"]
+                                },
+                                lunchRecipe: {
+                                    title: `Lunch Recipe for Day ${i+1}`,
+                                    ingredients: ["Add ingredients here"],
+                                    instructions: ["Add instructions here"]
+                                },
+                                dinnerRecipe: {
+                                    title: `Dinner Recipe for Day ${i+1}`,
+                                    ingredients: ["Add ingredients here"],
+                                    instructions: ["Add instructions here"]
+                                }
+                            };
+                        }
+                        window.saveRecipeCycle(newCycleId, newCycle);
+                    }
+                    document.body.removeChild(loadingToast);
+                    modal.classList.remove('active');
+                    showToast(`Created new cycle: ${window.generateCycleLabel(newCycleId)}`);
+                    loadAvailableCycles();
+                } catch (err) {
+                    document.body.removeChild(loadingToast);
+                    modal.classList.remove('active');
+                    showToast('Error creating cycle. Please try again.', 3000, 'error');
+                }
+            });
+
+            // Show modal
             modal.classList.add('active');
         }
-        
+
         // Add window method to get cycle date from ID
         if (!window.getCycleDateFromId) {
             window.getCycleDateFromId = function(cycleId, dayIndex) {
@@ -2307,7 +2310,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setupCalendarDropTargets();
         setupRecycleBin();
         setupPeriodButtons();
-        setupNewCycleButton(); // <-- Now we're properly calling this function!
+        setupNewCycleButton();
         
         // Add a default cycle if none exist
         const cycles = window.getMealCycles();

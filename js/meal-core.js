@@ -74,16 +74,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Generate cycle label (e.g., "Cycle 2 (May 31 - Jun 29, 2023)")
     function generateCycleLabel(cycleId) {
+        // Only accept IDs like "YYYY-NN"
+        if (!/^\d{4}-\d{2}$/.test(cycleId)) {
+            // Fallback: just show the ID or a friendly label
+            return cycleId.startsWith('Cycle') ? cycleId : `Cycle (${cycleId})`;
+        }
         const [year, cycleNum] = cycleId.split('-').map(x => parseInt(x));
         const startDay = (cycleNum - 1) * CYCLE_LENGTH + 1;
-        
+
         const startDate = getDayOfYearAsDate(startDay, year);
         const endDate = new Date(startDate);
         endDate.setDate(startDate.getDate() + CYCLE_LENGTH - 1);
-        
+
         const startFormatted = startDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
         const endFormatted = endDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
-        
+
         return `Cycle ${cycleNum} (${startFormatted} - ${endFormatted})`;
     }
     
